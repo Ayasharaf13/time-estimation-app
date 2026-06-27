@@ -1,0 +1,6 @@
+package db
+
+interface TaskSessionDao {
+
+
+}

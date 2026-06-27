@@ -16,10 +16,13 @@ foundation = "1.11.0"
 uiGraphics = "1.11.0"
 navigationCompose = "2.9.8"
 navigationRuntimeKtx = "2.9.8"
+room = "2.8.4"
+ksp = "2.0.21-1.0.27"
 
 [libraries]
 
 # المكتبة الأساسية للـ Compose
+
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
 # المكتبة المخصصة لـ Material 3 (بما أنكِ تستخدمينه)
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
@@ -46,7 +49,16 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", ve
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 
+
+# مكتبات الـ Room بتنسيق الـ Version Catalog
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
 

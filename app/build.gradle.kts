@@ -1,7 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
 }
+
+
 
 android {
     namespace = "com.example.scoretask"
@@ -57,6 +60,14 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.8")
    // implementation(libs.vico.core)
 
+    // 1. المكتبة الأساسية للـ Room (تم تصحيح الاسم هنا)
+    implementation(libs.room.runtime)
+
+    // 2. مكتبة دعم الـ Coroutines والـ Flow مع Room
+    implementation(libs.room.ktx)
+
+    // 3. مفسر الأكواد باستخدام KSP (الأسرع والأحدث)
+    ksp(libs.room.compiler)
     implementation(libs.androidx.compose.foundation)
 
     implementation(libs.androidx.ui.graphics)
@@ -69,3 +80,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+
+
