@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
     tableName = "task_templates",
     indices = [
         Index(value = ["title"], unique = true),
-        Index(value = ["isArchived"])
+        Index(value = ["is_archived"])
     ]
 )
 data class TaskTemplateEntity(
@@ -20,10 +20,10 @@ data class TaskTemplateEntity(
     val id: Long = 0L,
 
     @ColumnInfo(name = "title")
-    val title: String,
+    val title: String = "",
 
     @ColumnInfo(name = "default_estimate_ms")
-    val defaultEstimateMs: Long,
+    val defaultEstimateMs: Long = 0L,
 
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),

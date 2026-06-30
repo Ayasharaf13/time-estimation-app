@@ -63,5 +63,9 @@ class ConcreteLocalSource : LocalSource {
        return taskTemplateDao.isTitleExists(title)
     }
 
+    override suspend fun deleteTaskById(taskId: Long): Int {
+      return taskTemplateDao.deleteTaskById(taskId)
+    }
+
 
 }

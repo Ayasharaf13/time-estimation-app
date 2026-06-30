@@ -1,0 +1,57 @@
+package com.example.scoretask
+
+import com.example.scoretask.model.TaskTemplateEntity
+import db.LocalSource
+import kotlinx.coroutines.flow.Flow
+
+
+class TaskRepositoryImpl private constructor(
+    private val localSource: LocalSource // بنستقبل الـ LocalSource هنا
+) : TaskRepository {
+
+
+    companion object {
+        private var instance: TaskRepositoryImpl? = null
+
+        // بنعمل Singleton للـ Repo برضه عشان نضمن إن الأبلكيشن كله بيقرا من مكان واحد
+        fun getInstance(localSource: LocalSource): TaskRepositoryImpl {
+            if (instance == null) {
+                instance = TaskRepositoryImpl(localSource)
+            }
+            return instance as TaskRepositoryImpl
+        }
+    }
+    override suspend fun insertTask(task: TaskTemplateEntity): Long {
+        return localSource.insertTask(task)
+    }
+
+    override suspend fun updateTask(task: TaskTemplateEntity) {
+        localSource.updateTask(task)
+    }
+
+    override suspend fun archiveTask(taskId: Long) {
+       localSource.archiveTask(taskId)
+    }
+
+    override suspend fun restoreTask(taskId: Long) {
+       localSource.restoreTask(taskId)
+    }
+
+    override fun getAllTasks(): Flow<List<TaskTemplateEntity>> {
+     return localSource.getAllTasks()
+    }
+
+    override suspend fun getTaskById(taskId: Long): TaskTemplateEntity? {
+        return localSource.getTaskById(taskId)
+    }
+
+    override suspend fun isTitleExists(title: String): Boolean {
+       return localSource.isTitleExists(title)
+    }
+
+    override suspend fun deleteTaskById(taskId: Long): Int {
+        return localSource.deleteTaskById(taskId)
+    }
+
+
+}

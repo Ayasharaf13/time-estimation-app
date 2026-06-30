@@ -1,10 +1,10 @@
-package db
+package com.example.scoretask
 
 import com.example.scoretask.model.TaskTemplateEntity
 import kotlinx.coroutines.flow.Flow
 
+interface TaskRepository {
 
-interface LocalSource {
 
     suspend fun insertTask(task: TaskTemplateEntity): Long
     suspend fun updateTask(task: TaskTemplateEntity)
@@ -15,5 +15,4 @@ interface LocalSource {
     suspend fun isTitleExists(title: String): Boolean
 
     suspend fun deleteTaskById(taskId: Long): Int
-
 }

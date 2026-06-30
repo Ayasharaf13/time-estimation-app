@@ -77,6 +77,9 @@ import kotlinx.coroutines.flow.Flow
         suspend fun getTaskById(taskId: Long): TaskTemplateEntity?
 
 
+    @Query("DELETE FROM task_templates WHERE task_id = :taskId")
+    suspend fun deleteTaskById(taskId: Long): Int
+
         // ------------------------
         // Check Duplicate Title
         // ------------------------

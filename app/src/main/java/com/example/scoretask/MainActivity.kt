@@ -5,8 +5,10 @@ import android.R.attr.centerX
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.Nullable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,12 +36,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedCard
@@ -51,6 +57,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +80,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
@@ -90,10 +98,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.scoretask.model.TaskTemplateEntity
 import com.example.scoretask.ui.theme.AlarmTextStyle
 import com.example.scoretask.ui.theme.ScoreTaskTheme
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -111,6 +122,7 @@ import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
+import db.ConcreteLocalSource
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -119,18 +131,25 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
+        val localSource = ConcreteLocalSource.getInstance(applicationContext)
+        val repository = TaskRepositoryImpl.getInstance(localSource)
 
-        // enableEdgeToEdge()
+        // 🛠️ 2. إنشاء الـ ViewModel بـ السطر المعتمد من جوجل باستخدام الـ Factory
+        val taskViewModel: TaskViewModel by viewModels {
+            TaskViewModelFactory(repository)
+        }
+
 
         setContent {
 
             window.statusBarColor = android.graphics.Color.parseColor("#331E66")//.TRANSPARENT
 
+
             ScoreTaskTheme {
 
                 // 1. تعريف الـ NavController الرئيسي للتطبيق كله
                 val rootNavController = rememberNavController()
-
+                // TaskScreenWrapper(taskViewModel)
 
                 // 2. الـ NavHost الرئيسي (المسرح الأكبر للتطبيق)
                 NavHost(
@@ -156,7 +175,7 @@ class MainActivity : ComponentActivity() {
                     // --- المرحلة الثالثة: الشاشة الرئيسية (التي تحتوي على الـ Bottom Nav) ---
                     composable(route = Screen.MainHome.route) {
 
-                        BottomNav()
+                        BottomNav( taskViewModel)
                     }
 
 
@@ -167,7 +186,7 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun BottomNav() {
+    fun BottomNav(taskViewModel: TaskViewModel) {
 
         // 1. تعريف الحالة في قمة الدالة (Top of the function)
         val selectedNavigationIndex = rememberSaveable {
@@ -288,10 +307,15 @@ class MainActivity : ComponentActivity() {
 
                 ) {
                 composable(route = Screen.MainHome.route) {
-                    HomeScreen()
+
+                    HomeRoute(taskViewModel)
+                   // HomeScreen()
+
+                   // TaskScreenWrapper(viewModel = taskViewModel )
                 }
                 composable(route = Screen.Task.route) {
-                    DailyOverviewScreen()
+                    TaskRoute(taskViewModel)
+                   // DailyOverviewScreen(taskViewModel)
 
                 }
                 composable(
@@ -1021,12 +1045,16 @@ fun TodayOverviewCard() {
     }
 }
 
+
+
+
 @Composable
-fun TaskRow() {
+fun TaskRow(titleTask: String = "",estimateTask:Long = 0L) {
 
 
     Text(
-        text = "Design review sesstion",
+
+        text = titleTask,
         color = Color.White,
 
 
@@ -1047,7 +1075,8 @@ fun TaskRow() {
 
     {
         Text(
-            text = "00:222",
+           text = estimateTask.toString() ,
+           // text = "00:222",
             color = Color(0xFFA9A7A7),
 
 
@@ -1080,10 +1109,68 @@ fun TaskRow() {
     }
 
 }
+@Composable
+fun TaskTemplatesList(
+    uiState: TaskUiState, // 🟢 بنستقبل الـ State كاملة ككتلة واحدة
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+
+        // الحارس الأول: لو الداتا لسه بتحمل من الـ Room
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                color = Color(0xFF7446DE),
+                modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
+            )
+        }
+
+        // الحارس الثاني: لو ظهر خطأ
+        uiState.errorMessage?.let { error ->
+            Text(text = "Error: $error", color = Color.Red, modifier = Modifier.padding(16.dp))
+        }
+
+        // الحارس الثالث: لو مفيش تحميل والداتا وصلت تمام
+        if (!uiState.isLoading) {
+            if (uiState.tasksList.isEmpty()) {
+                // لو قاعدة البيانات لسه فاضية ومفيهاش تاسكات معروضة
+                Text(
+                    text = "No tasks found. Click OK to add!",
+                    color = Color.White.copy(alpha = 0.5f),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp)
+                )
+            } else {
+                // 🚀 السحر هنا: الـ LazyColumn بياخد اللستة وبيرسم كروت ديناميكية متكررة
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp) // مسافة شياكة بين كل صف والتاني
+                ) {
+                    items(uiState.tasksList) { currentTask ->
+                        // بننادي على الدالة المعدلة فوق وبنباصي لها التاسك الحالية في اللوب
+                        TaskRow(currentTask.title,currentTask.defaultEstimateMs)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskRoute(
+    viewModel: TaskViewModel = viewModel()
+) {
+
+    val state by viewModel.uiState.collectAsState()
+
+
+    DailyOverviewScreen (state)
+
+}
+
+
 
 
 @Composable
-fun DailyOverviewScreen() {
+fun DailyOverviewScreen(  state: TaskUiState) {
     BgScreen()
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -1193,29 +1280,60 @@ fun DailyOverviewScreen() {
             end = Offset(Float.POSITIVE_INFINITY, 0f)
         )
 
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth() // بدلاً من العرض الثابت 602
-                .heightIn(min = 110.dp) // تحويل الـ 159px تقريباً إلى dp متناسب مع الشاشات
-                .padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(17.dp),
-            border = BorderStroke(1.dp, Color(0x2EAD8AFF)), // #AD8AFF2E
-            colors = CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 8.dp), // مسافة في أعلى وأسفل القائمة بالكامل
+            verticalArrangement = Arrangement.spacedBy(12.dp) // 💡 تصنع مسافة تلقائية بمقدار 12dp بين كل كارد والآخر
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, top = 20.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween, // دفع العناصر للأطراف
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TaskRow()
-            }
+
+            items(state.tasksList) { task ->
+
+                // 2. الـ OutlinedCard الآن أصبحت داخل الـ items لتتكرر مع كل عنصر
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 110.dp)
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(17.dp),
+                    border = BorderStroke(1.dp, Color(0x2EAD8AFF)),
+                    colors = CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
+                ) {
+
+                    // 3. محتويات الكارد من الداخل
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        // استدعاء تصميم السطر الخاص بكِ وتمرير بيانات الـ task الحالية له
+                        TaskRow(
+                            titleTask = task.title,
+                            estimateTask = task.defaultEstimateMs
+                        )
+
+                    }
+
+                }
+
+        }
+
 
 
         }
     }
 }
+
+
+
+
+
+
+
+
+
 
 
 @Composable
@@ -1874,8 +1992,13 @@ fun CustomBasicTimeInput(
 }
 
 @Composable
-fun EnterTask() {
-    var text by remember { mutableStateOf("") }
+
+fun EnterTask(
+    state: TaskCreationState,
+    onIntent: (TaskIntent) -> Unit
+
+){
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -1932,8 +2055,12 @@ fun EnterTask() {
                 )
 
                 OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
+                    value = state.title,
+                    onValueChange = { newValue->
+                                     // text = newValue
+                        onIntent(
+                            TaskIntent.TitleChanged(newValue)
+                        )},
                     label = { Text(text = "Date") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1968,7 +2095,14 @@ fun EnterTask() {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     // زر التأكيد (واضح وجاذب للانتباه)
-                    TextButton(onClick = { /* Dismiss */ }) {
+                    TextButton(onClick = {
+
+
+                        Toast.makeText(context, "The task name has been successfully saved.", Toast.LENGTH_SHORT).show()
+
+
+
+                    }) {
                         Text("OK", color = Color.White)
                     }
                 }
@@ -1982,10 +2116,12 @@ fun EnterTask() {
 }
 
 @Composable
-fun EnterExpectTime() {
-    var hours by remember { mutableStateOf("") }
-    var minuts by remember { mutableStateOf("") }
+fun EnterExpectTime(
+    state: TaskCreationState,
 
+    onIntent: (TaskIntent) -> Unit
+){
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -2046,8 +2182,12 @@ fun EnterExpectTime() {
 
                     // حقل الساعات
                     CustomBasicTimeInput(
-                        value = hours,
-                        onValueChange = { hours = it },
+                        value = state.hours,
+                      //  value = hours,
+                        onValueChange = { newValue->
+                           // hours = newValue
+                            onIntent (TaskIntent.HoursChanged(newValue))
+                                },
                         unit = "h",
                         containerColor = Color(0xFF4F378B),
                         modifier = Modifier.weight(1f)
@@ -2064,8 +2204,12 @@ fun EnterExpectTime() {
 
                     // حقل الدقائق
                     CustomBasicTimeInput(
-                        value = minuts,
-                        onValueChange = { minuts = it },
+                        value = state.minutes,
+                       // value = minuts,
+                        onValueChange = { newValue->
+                           // minuts = newValue
+                            onIntent(TaskIntent.MinutesChanged(newValue))
+                        },
                         unit = "min",
                         containerColor = Color(0xFF7B42FF),
                         modifier = Modifier.weight(1f)
@@ -2083,7 +2227,19 @@ fun EnterExpectTime() {
                         Text("Cancel", color = Color.White)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { /* OK */ }) {
+                    TextButton(onClick = { /* OK */
+
+                      //  Log.i("testButton::First",inputHolder.title)
+                       if (state.title.isNotEmpty()) {
+                            onIntent (TaskIntent.SaveTask)
+                           Toast.makeText(context, "The task has been successfully saved.", Toast.LENGTH_SHORT).show()
+
+
+                       }
+
+
+                    }) {
+
                         Text("OK", color = Color.White)
                     }
                 }
@@ -2094,106 +2250,133 @@ fun EnterExpectTime() {
     }
 }
 
+
 @Composable
-fun HomeScreen() {
+fun HomeRoute(
+    viewModel: TaskViewModel
+) {
+    val state by viewModel.state.collectAsState()
+
+    HomeScreen(
+        state = state,
+        onIntent = viewModel::onIntent
+    )
+}
+@Composable
+fun HomeScreen(
+
+    state: TaskCreationState,
+    onIntent: (TaskIntent) -> Unit
+
+) {
 
 
-         BgScreen()
-        Column(
-            Modifier.fillMaxSize()
-        )// توسيط أفقي)
+    BgScreen()
+    Column(
+        Modifier.fillMaxSize()
+    )// توسيط أفقي)
 
-        {
-            Spacer(modifier = Modifier.height(53.dp))
+    {
+        Spacer(modifier = Modifier.height(53.dp))
 
-            Text(
+        Text(
 
-                text = "Alarm",
-                style = AlarmTextStyle,
-                modifier = Modifier
-                    .wrapContentSize()
+            text = "Alarm",
+            style = AlarmTextStyle,
+            modifier = Modifier
+                .wrapContentSize()
 
-                    .padding(start = 38.dp),
+                .padding(start = 38.dp),
 
-                )
+            )
 
 
-            Spacer(modifier = Modifier.height(44.dp))
+        Spacer(modifier = Modifier.height(44.dp))
 
-            EnterTask()
+        EnterTask(
+
+            state = state,
+            onIntent = onIntent
+        )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            EnterExpectTime()
 
 
-        }
-    }
-
-
-@Composable
-fun SplashContent(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        // 1. صورة البومة الفخمة (الـ Logo الخاص بالتطبيق)
-        Image(
-            painter = painterResource(id = R.drawable.img_splash),
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(300.dp),
-            contentScale = ContentScale.Fit
-        )
-
-        // 2. عمود النصوص الترحيبية ونصوص اسم التطبيق
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy((-15).dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // الكلمة الأولى: Score
-            Text(
-                text = "Score",
-                modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
-                style = TextStyle(
-                    fontSize = 96f.screenFontSize(),
-                    fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-                    color = Color.White,
-                    letterSpacing = (-2).sp
-                )
+            EnterExpectTime(
+                state = state,
+                onIntent = onIntent
             )
 
-            // الكلمة الثانية: Task
-            Text(
-                text = "Task",
-                modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
-                style = TextStyle(
-                    fontSize = 96f.screenFontSize(),
-                    fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-                    color = Color(0xFFB99BFF)
-                )
-            )
 
-            Spacer(modifier = Modifier.height(55.dp))
 
-            // النص الفرعي الصغير السفلي
-            Text(
-                text = "Stay Focused, Stay Productive",
-                modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
-                style = TextStyle(
-                    fontSize = 20f.screenFontSize(),
-                    fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-                    color = Color(0xFFC3C3C3),
-                    letterSpacing = 1.sp
-                )
-            )
-        }
-    }
+   }
 }
-/*
+
+
+    @Composable
+    fun SplashContent(
+        modifier: Modifier = Modifier
+    ) {
+        Box(
+            modifier = modifier.fillMaxSize()
+        ) {
+            // 1. صورة البومة الفخمة (الـ Logo الخاص بالتطبيق)
+            Image(
+                painter = painterResource(id = R.drawable.img_splash),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(300.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            // 2. عمود النصوص الترحيبية ونصوص اسم التطبيق
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy((-15).dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // الكلمة الأولى: Score
+                Text(
+                    text = "Score",
+                    modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
+                    style = TextStyle(
+                        fontSize = 96f.screenFontSize(),
+                        fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+                        color = Color.White,
+                        letterSpacing = (-2).sp
+                    )
+                )
+
+                // الكلمة الثانية: Task
+                Text(
+                    text = "Task",
+                    modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
+                    style = TextStyle(
+                        fontSize = 96f.screenFontSize(),
+                        fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+                        color = Color(0xFFB99BFF)
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(55.dp))
+
+                // النص الفرعي الصغير السفلي
+                Text(
+                    text = "Stay Focused, Stay Productive",
+                    modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
+                    style = TextStyle(
+                        fontSize = 20f.screenFontSize(),
+                        fontFamily = FontFamily(Font(R.font.sfpro_regular)),
+                        color = Color(0xFFC3C3C3),
+                        letterSpacing = 1.sp
+                    )
+                )
+            }
+        }
+    }
+    /*
 @Composable
 fun SplashBackground(
     modifier: Modifier = Modifier,
@@ -2270,51 +2453,74 @@ fun SplashBackground(
     )
 }*/
 
-@Composable
-fun SplashBackground(content: @Composable BoxScope.() -> Unit) {
-    val splashGlows = remember {
-        listOf(
-            // التوهج العلوي (يستخدم اللون الثالث الافتراضي)
-            GlowConfig(
-                widthRatio = 872f, heightRatio = 792f, offsetXRatio = -202f, offsetYRatio = -604f, shapeType = GlowShape.OVAL,
-                customColors = { c1, c2 -> listOf(0.0f to color1, 0.375f to color2, 1.0f to Color.Transparent )}, alpha = 0.4f
-            ),
-            // التوهج السفلي المستطيل الأبيض
-            GlowConfig(
-                widthRatio = 630f, heightRatio = 630f, offsetXRatio = 0f, offsetYRatio = 551f, shapeType = GlowShape.CIRCLE,
-                customColors = { _, _ -> listOf(0.0f to Color(0xFFEBEBEB), 0.38f to color2, 1.0f to Color.Transparent) }, radiusPercent =  0.44f
+    @Composable
+    fun SplashBackground(content: @Composable BoxScope.() -> Unit) {
+        val splashGlows = remember {
+            listOf(
+                // التوهج العلوي (يستخدم اللون الثالث الافتراضي)
+                GlowConfig(
+                    widthRatio = 872f,
+                    heightRatio = 792f,
+                    offsetXRatio = -202f,
+                    offsetYRatio = -604f,
+                    shapeType = GlowShape.OVAL,
+                    customColors = { c1, c2 ->
+                        listOf(
+                            0.0f to color1,
+                            0.375f to color2,
+                            1.0f to Color.Transparent
+                        )
+                    },
+                    alpha = 0.4f
+                ),
+                // التوهج السفلي المستطيل الأبيض
+                GlowConfig(
+                    widthRatio = 630f,
+                    heightRatio = 630f,
+                    offsetXRatio = 0f,
+                    offsetYRatio = 551f,
+                    shapeType = GlowShape.CIRCLE,
+                    customColors = { _, _ ->
+                        listOf(
+                            0.0f to Color(0xFFEBEBEB),
+                            0.38f to color2,
+                            1.0f to Color.Transparent
+                        )
+                    },
+                    radiusPercent = 0.44f
 
+                )
             )
-        )
+        }
+
+        AppGlowBackground(glowList = splashGlows, content = content)
     }
 
-    AppGlowBackground(glowList = splashGlows, content = content)
-}
+    @Composable
+    fun SplashScreen(navController: NavController) {
+        // 1. إدارة منطق التوقيت والانتقال
+        LaunchedEffect(Unit) {
+            delay(1000)
+            navController.navigate(Screen.Onboarding.route) {
+                popUpTo(Screen.Splash.route) { inclusive = true }
+            }
+        }
 
-@Composable
-fun SplashScreen(navController: NavController) {
-    // 1. إدارة منطق التوقيت والانتقال
-    LaunchedEffect(Unit) {
-        delay(1000)
-        navController.navigate(Screen.Onboarding.route) {
-            popUpTo(Screen.Splash.route) { inclusive = true }
+        // 2. تجميع الشاشة: نضع الخلفية وبداخلها المحتوى
+        SplashBackground {
+            SplashContent()
         }
     }
 
-    // 2. تجميع الشاشة: نضع الخلفية وبداخلها المحتوى
-    SplashBackground {
-        SplashContent()
+
+    @Composable
+    fun Greeting(name: String, modifier: Modifier = Modifier) {
+        Text(
+            text = "Hello $name!",
+            modifier = modifier
+        )
     }
-}
 
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
 
 /*
