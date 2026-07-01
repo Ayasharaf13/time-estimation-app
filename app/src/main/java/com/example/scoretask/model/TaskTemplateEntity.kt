@@ -25,6 +25,8 @@ data class TaskTemplateEntity(
     @ColumnInfo(name = "default_estimate_ms")
     val defaultEstimateMs: Long = 0L,
 
+
+
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
 
@@ -38,3 +40,6 @@ data class TaskTemplateEntity(
     @ColumnInfo(name = "last_modified")
     val lastModified: Long = System.currentTimeMillis()
 )
+
+val TaskTemplateEntity.totalMinutes: Long
+    get() = defaultEstimateMs / (1000 * 60)

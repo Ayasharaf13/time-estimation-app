@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.DrawableRes
 import androidx.annotation.Nullable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -42,6 +43,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,6 +58,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -78,6 +82,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -105,6 +110,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.scoretask.model.TaskTemplateEntity
+import com.example.scoretask.model.totalMinutes
 import com.example.scoretask.ui.theme.AlarmTextStyle
 import com.example.scoretask.ui.theme.ScoreTaskTheme
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -308,7 +314,9 @@ class MainActivity : ComponentActivity() {
                 ) {
                 composable(route = Screen.MainHome.route) {
 
-                    HomeRoute(taskViewModel)
+
+
+                   HomeRoute(taskViewModel)
                    // HomeScreen()
 
                    // TaskScreenWrapper(viewModel = taskViewModel )
@@ -322,6 +330,7 @@ class MainActivity : ComponentActivity() {
                     route = Screen.Stats.route
                 ) {
                     DashboardScreen()
+                   // ScoreTaskTimer()
                 }
 
             }
@@ -858,7 +867,101 @@ fun TimeMuscleProgressIndicator(
         )
     }
 }
+//CustomTopAppBar
 
+@Composable
+fun ScreenHeader (
+    title: String,
+    // 1. تمرير الأيقونة اليسرى كـ Resource ID، وافتراضياً هي أيقونة الـ Back الخاص بكِ
+    @DrawableRes navigationIcon: Int = R.drawable.icon_back,
+    onNavigationClick: () -> Unit = {},
+
+    // 2. زر التعديل نجعله اختياري (null بافتراض)
+    showEditButton: Boolean = false,
+    onEditClick: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .statusBarsPadding(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        // أيقونة التنقل (تتغير تلقائياً حسب الشاشة)
+        IconButton(
+            onClick = onNavigationClick,
+            modifier = Modifier.size(48.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = navigationIcon),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        // عنوان الشاشة
+        Text(
+            text = title,
+            color = Color.White,
+            fontSize = 20.sp,
+            modifier = Modifier.weight(1f),
+            style = TextStyle(
+                fontWeight = FontWeight.Black,
+                fontFamily = FontFamily(Font(R.font.sfpro_bold))
+            )
+        )
+
+        // 3. السحر هنا: إذا كانت قيمة showEditButton تساوي true سيتم رسم الزر، وإلا سيختفي تماماً!
+        if (showEditButton) {
+            Box(
+                modifier = Modifier
+                    .minimumInteractiveComponentSize()
+                    .wrapContentSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = onEditClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .height(20.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_round_edit),
+                            contentDescription = null,
+                            tint = Color(0xFF8C5BFF),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = "Edit",
+                            color = Color(0xFF040415),
+                            style = TextStyle(
+                                fontFamily = FontFamily(Font(R.font.inter_medium)),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                lineHeight = 10.sp
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+/*
 @Composable
 fun ScreenHeader() {
     Row(
@@ -908,7 +1011,7 @@ fun ScreenHeader() {
 
         )
     }
-}
+}*/
 
 @Composable
 fun TodayOverviewCard() {
@@ -1049,7 +1152,7 @@ fun TodayOverviewCard() {
 
 
 @Composable
-fun TaskRow(titleTask: String = "",estimateTask:Long = 0L) {
+fun TaskRow(titleTask: String = "",displayTime:String = "") {
 
 
     Text(
@@ -1075,8 +1178,7 @@ fun TaskRow(titleTask: String = "",estimateTask:Long = 0L) {
 
     {
         Text(
-           text = estimateTask.toString() ,
-           // text = "00:222",
+           text = displayTime,
             color = Color(0xFFA9A7A7),
 
 
@@ -1109,50 +1211,7 @@ fun TaskRow(titleTask: String = "",estimateTask:Long = 0L) {
     }
 
 }
-@Composable
-fun TaskTemplatesList(
-    uiState: TaskUiState, // 🟢 بنستقبل الـ State كاملة ككتلة واحدة
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
 
-        // الحارس الأول: لو الداتا لسه بتحمل من الـ Room
-        if (uiState.isLoading) {
-            CircularProgressIndicator(
-                color = Color(0xFF7446DE),
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
-            )
-        }
-
-        // الحارس الثاني: لو ظهر خطأ
-        uiState.errorMessage?.let { error ->
-            Text(text = "Error: $error", color = Color.Red, modifier = Modifier.padding(16.dp))
-        }
-
-        // الحارس الثالث: لو مفيش تحميل والداتا وصلت تمام
-        if (!uiState.isLoading) {
-            if (uiState.tasksList.isEmpty()) {
-                // لو قاعدة البيانات لسه فاضية ومفيهاش تاسكات معروضة
-                Text(
-                    text = "No tasks found. Click OK to add!",
-                    color = Color.White.copy(alpha = 0.5f),
-                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp)
-                )
-            } else {
-                // 🚀 السحر هنا: الـ LazyColumn بياخد اللستة وبيرسم كروت ديناميكية متكررة
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp) // مسافة شياكة بين كل صف والتاني
-                ) {
-                    items(uiState.tasksList) { currentTask ->
-                        // بننادي على الدالة المعدلة فوق وبنباصي لها التاسك الحالية في اللوب
-                        TaskRow(currentTask.title,currentTask.defaultEstimateMs)
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun TaskRoute(
@@ -1165,6 +1224,178 @@ fun TaskRoute(
     DailyOverviewScreen (state)
 
 }
+
+
+@Composable
+fun ScoreTaskTimer( initialValue: Float = 0.1f,  totalTime: Long =60000L) {
+
+    var value by remember {
+        mutableStateOf(initialValue)
+    }
+
+    // create variable for current time
+    var currentTime by remember {
+        mutableStateOf(totalTime)
+    }
+    // create variable for isTimerRunning
+    var isTimerRunning by remember {
+        mutableStateOf(true)
+    }
+
+    LaunchedEffect(key1 = currentTime, key2 = isTimerRunning) {
+        if(currentTime > 0 && isTimerRunning) {
+            delay(100L)
+            currentTime -= 100L
+            value = currentTime / totalTime.toFloat()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(basePurple)) {}
+    Box(
+        modifier = Modifier
+
+            .fillMaxSize()
+            .background(basePurple)
+            .drawWithCache {
+                // الأبعاد الأصلية التي أعطيتِني إياها (Frame Size)
+                val designWidth = 720f
+                val designHeight = 1600f
+
+                // 1. حساب الأبعاد الحقيقية بناءً على شاشة المستخدم الحالية
+                val glowWidth = size.width * (938f / designWidth)
+                val glowHeight = size.height * (1078f / designHeight)
+
+
+
+                // 2. حساب الإزاحة (Offsets) بدقة
+                val offsetX = size.width * (177f / designWidth)
+                val offsetY = size.height * (509f / designHeight)
+
+                onDrawBehind {
+                    // رسم المستطيل الذي يحمل التوهج
+                    drawOval(
+                        brush = Brush.radialGradient(
+                            0.0f to color1,
+                            0.38f to color2,
+                            // 0.85f to Color(0xFF6943AC).copy(alpha = 0.24f), // هنا نضع الـ 24% الخاصة بفيجما
+                            1.0f to Color.Transparent,
+
+                            center = Offset(
+                                // نسلتها اد ايه
+                                x =  offsetX+(glowWidth * 0.6186f),
+                                y = offsetY+ (glowHeight * 0.3892f)
+                            ),
+                            // مدي اتشارها
+                            radius = glowWidth * 0.5772f
+
+
+                        ),
+                        // هبدا رسم منين
+                        topLeft = Offset(offsetX, offsetY),
+                        // حجمها اد ايه
+                        size = Size(glowWidth, glowHeight),
+                        // تطبيق الشفافية الكلية (0.4) ووضع الدمج
+                        //   alpha = 0.2f,
+                        blendMode = BlendMode.Overlay
+                    )
+                }
+
+            }.blur(
+                radius = 81.dp,
+                edgeTreatment = BlurredEdgeTreatment.Unbounded
+            )
+    )
+    Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally)
+
+    {
+
+        Spacer(Modifier.height(50.dp))
+
+        ScreenHeader("ReadingSeationnnn", showEditButton = true)
+
+        Spacer(modifier = Modifier.height(110.dp))
+
+        // progress من 1.0 (بداية) إلى 0.0 (نهاية)
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(146.dp)
+            //.fillMaxSize()
+            // .background(Color(0xFF4A2997))
+        ) {
+
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val strokeWidth = 8.dp.toPx() // استنتاج السمك بالنظر
+
+                // 1. الدائرة البيضاء (الخلفية الشفافة 20%)
+                drawCircle(
+                    Color(0xFF7F69B3).copy(alpha = 0.5f),
+                   // color = Color(0xFFE4D8FF).copy(alpha = 0.2f),
+                    // brush = Brush.linearGradient(colorStops = scoreTaskTimerStops),
+
+                    style = Stroke(width = strokeWidth)
+                )
+
+                // 2. القوس الأسود (التقدم)
+                drawArc(
+                    // brush = Brush.linearGradient(colorStops = scoreTaskTimerStops),
+                    color =  Color(0xFF200C4E),//Color.Black,
+                    startAngle = -90f,
+                    sweepAngle = value * 360f,//360f * progress,
+                    useCenter = false,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
+            }
+// 1. حساب الدقائق المتبقية
+            val minutes = (currentTime / 1000L) / 60
+
+// 2. حساب الثواني المتبقية (باقي القسمة على 60 لتبدأ من 59 وتنازلياً)
+            val seconds = (currentTime / 1000L) % 60
+
+// 3. تنسيق النص ليظهر دائماً بخانتين (مثلاً الـ 5 ثواني تظهر 05 وليس 5)
+            val formattedTime = String.format("%02d:%02d", minutes, seconds)
+            // 3. نص الوقت في المنتصف
+            Text(
+                text =  formattedTime,//(currentTime / 1000L).toString(), //"45:00",
+                style = TextStyle(
+                    fontWeight = Black,
+                    lineHeight = 11.sp,
+                    letterSpacing = 1.sp,// FontWeight(860),
+                    fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+
+                    ),
+                color = Color.White, fontSize = 32.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(80.dp))
+        Row(
+            Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+
+            Icon(
+                painter = painterResource(id = R.drawable.icon_play), // اسم الملف الذي أنشأتِه
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier.size(41.dp)//.padding(top = 2.dp, start = 2.dp) // حجم ثابت كما اتفقنا
+            )
+            Spacer(modifier = Modifier.width(80.dp))
+
+
+            Icon(
+                painter = painterResource(id = R.drawable.retry_icon), // اسم الملف الذي أنشأتِه
+                contentDescription = null,
+                modifier = Modifier.size(41.dp)//.padding(top = 2.dp, start = 2.dp) // حجم ثابت كما اتفقنا
+            )
+        }
+    }
+
+}
+
+
+
+
+
 
 
 
@@ -1181,7 +1412,7 @@ fun DailyOverviewScreen(  state: TaskUiState) {
 
         Spacer(Modifier.height(50.dp))
 
-        ScreenHeader()
+        ScreenHeader("MyProductivty",R.drawable.back_arrow)
 
         Spacer(Modifier.height(50.dp))
 
@@ -1311,7 +1542,7 @@ fun DailyOverviewScreen(  state: TaskUiState) {
                         // استدعاء تصميم السطر الخاص بكِ وتمرير بيانات الـ task الحالية له
                         TaskRow(
                             titleTask = task.title,
-                            estimateTask = task.defaultEstimateMs
+                            displayTime = "${task.totalMinutes} minutes"
                         )
 
                     }
@@ -1443,7 +1674,7 @@ fun DashboardScreen() {
     {
 
         Spacer(Modifier.height(50.dp))
-        ScreenHeader()
+        ScreenHeader("MySccore",R.drawable.back_arrow)
         Spacer(Modifier.height(50.dp))
         val cardGradient = Brush.linearGradient(
             0.0f to Color(0xFF6347A4).copy(alpha = 0.2f), // البداية (تقريباً -6.66%)
