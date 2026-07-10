@@ -8,6 +8,8 @@ sealed   class Screen (val route:String) {
      object Task: Screen("task_screen")
      object Stats: Screen("stats_screen")
 
+     object TimerTask: Screen("timer_screen")
+
 
 }
 

@@ -130,6 +130,10 @@ import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import db.ConcreteLocalSource
 import kotlinx.coroutines.delay
+import kotlin.collections.minusAssign
+import kotlin.compareTo
+import kotlin.div
+import kotlin.text.toFloat
 
 class MainActivity : ComponentActivity() {
 
@@ -144,6 +148,10 @@ class MainActivity : ComponentActivity() {
         val taskViewModel: TaskViewModel by viewModels {
             TaskViewModelFactory(repository)
         }
+
+       /* val timerViewModel: TimerViewModel by viewModels {
+            TimerViewModelFactory(repository)
+        }*/
 
 
         setContent {
@@ -163,36 +171,63 @@ class MainActivity : ComponentActivity() {
                     startDestination = Screen.Splash.route // نقطة انطلاق التطبيق الحتمية
                 ) {
 
+
+
+
                     // --- المرحلة الأولى: الـ Splash ---
                     composable(route = Screen.Splash.route) {
-                        SplashScreen(navController = rootNavController)
+                        SplashScreen(
+                            onTimeout = {
+                                rootNavController.navigate(Screen.Onboarding.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                            }
+                        )
                     }
 
                     // --- المرحلة الثانية: الـ Onboarding ---
                     composable(route = Screen.Onboarding.route) {
                         OnBoardingScreen(onFinished = {
-                            // الانتقال للرئيسية وحذف الـ Onboarding تماماً من السجل
+
                             rootNavController.navigate(Screen.MainHome.route) {
                                 popUpTo(Screen.Onboarding.route) { inclusive = true }
                             }
                         })
                     }
 
-                    // --- المرحلة الثالثة: الشاشة الرئيسية (التي تحتوي على الـ Bottom Nav) ---
+
+
                     composable(route = Screen.MainHome.route) {
 
-                        BottomNav( taskViewModel)
+                        BottomNav( taskViewModel, rootNavController)
                     }
 
 
+
+                    // val state by timerViewModel.state.collectAsStateWithLifecycle()
+                    // 🚀 سجلنا شاشة التايمر هنا كشاشة كاملة في الخريطة الكبرى
+                    composable(route = Screen.TimerTask.route) {
+
+                        val timerViewModel: TimerViewModel = viewModel(
+                            factory = TimerViewModelFactory(repository)
+                        )
+
+                        ScoreRoute(timerViewModel)
+                    }
+
+
+
+
                 }
+
             }
         }
     }
 
 
+
     @Composable
-    fun BottomNav(taskViewModel: TaskViewModel) {
+    fun BottomNav(taskViewModel: TaskViewModel ,rootNavController: NavController) {
 
         // 1. تعريف الحالة في قمة الدالة (Top of the function)
         val selectedNavigationIndex = rememberSaveable {
@@ -306,6 +341,9 @@ class MainActivity : ComponentActivity() {
         { innerPadding ->
 
 
+                // 2. الشاشة الأولى (Task Screen)
+
+
             NavHost(
                 navController = bottomNavController,
                 startDestination = Screen.MainHome.route,
@@ -314,9 +352,12 @@ class MainActivity : ComponentActivity() {
                 ) {
                 composable(route = Screen.MainHome.route) {
 
-
-
-                   HomeRoute(taskViewModel)
+                   HomeRoute(viewModel = taskViewModel,
+                       onNavigateToTimer = {
+                           // هنا نأمر الموجه الأكبر بفتح شاشة التايمر المسجلة فوق
+                           rootNavController.navigate(Screen.TimerTask.route)
+                       }
+                   )
                    // HomeScreen()
 
                    // TaskScreenWrapper(viewModel = taskViewModel )
@@ -333,7 +374,13 @@ class MainActivity : ComponentActivity() {
                    // ScoreTaskTimer()
                 }
 
+
+
+
+
             }
+
+
 
 
             val SplashCenterColor = Color(0xFF6B3FE2) // اللون الأرجواني الفاتح في الوسط
@@ -474,117 +521,6 @@ fun BgScreen() {
         // واجهة الشاشة هنا
     }
 }
-/*
-@Composable
-fun BgScreen() {
-
-
-    Box(
-        modifier = Modifier
-
-            .fillMaxSize()
-            .background(basePurple)
-            .drawWithCache {
-                // الأبعاد الأصلية التي أعطيتِني إياها (Frame Size)
-                val designWidth = 720f
-                val designHeight = 1600f
-
-                // 1. حساب الأبعاد الحقيقية بناءً على شاشة المستخدم الحالية
-                val glowWidth = size.width * (938f / designWidth)
-                val glowHeight = size.height * (1078f / designHeight)
-
-
-                // 2. حساب الإزاحة (Offsets) بدقة
-                val offsetX = size.width * (-287f / designWidth)
-                val offsetY = size.height * (-378f / designHeight)
-
-                onDrawBehind {
-                    // رسم المستطيل الذي يحمل التوهج
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            0.0f to color1,
-                            0.38f to color2,
-                            // 0.85f to Color(0xFF6943AC).copy(alpha = 0.24f), // هنا نضع الـ 24% الخاصة بفيجما
-                            1.0f to Color.Transparent,
-
-                            center = Offset(
-                                // نسلتها اد ايه
-                                x = offsetX + (glowWidth * 0.6186f),
-                                y = offsetY + (glowHeight * 0.3892f)
-                            ),
-                            // مدي اتشارها
-                            radius = glowWidth * 0.4772f
-
-
-                        ),
-
-                        center = Offset(
-                            // نسلتها اد ايه
-                            x = offsetX + (glowWidth * 0.6186f),
-                            y = offsetY + (glowHeight * 0.3892f)
-                        ),
-                        radius = glowWidth * 0.4772f,
-                        // هبدا رسم منين
-                        //topLeft = Offset(offsetX, offsetY),
-                        // حجمها اد ايه
-                        // size = Size(glowWidth, glowHeight),
-                        // تطبيق الشفافية الكلية (0.4) ووضع الدمج
-                        //   alpha = 0.2f,
-                        blendMode = BlendMode.Overlay
-                    )
-                }
-
-
-            }
-            .drawWithCache {
-                // الأبعاد الأصلية التي أعطيتِني إياها (Frame Size)
-                val designWidth = 720f
-                val designHeight = 1600f
-
-                // 1. حساب الأبعاد الحقيقية بناءً على شاشة المستخدم الحالية
-                val glowWidth = size.width * (938f / designWidth)
-                val glowHeight = size.height * (1078f / designHeight)
-
-
-                // 2. حساب الإزاحة (Offsets) بدقة
-                val offsetX = size.width * (177f / designWidth)
-                val offsetY = size.height * (509f / designHeight)
-
-                onDrawBehind {
-                    // رسم المستطيل الذي يحمل التوهج
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            0.0f to color1,
-                            0.38f to color2,
-                            1.0f to Color.Transparent,
-
-                            center = Offset(
-                                // نسلتها اد ايه
-                                x = offsetX + (glowWidth * 0.6186f),
-                                y = offsetY + (glowHeight * 0.3892f)
-                            ),
-                            // مدي اتشارها
-                            radius = glowWidth * 0.5772f
-
-
-                        ),
-                        center = Offset(
-                            // نسلتها اد ايه
-                            x = offsetX + (glowWidth * 0.6186f),
-                            y = offsetY + (glowHeight * 0.3892f)
-                        ),
-                        // مدي اتشارها
-                        radius = glowWidth * 0.5772f,
-                        blendMode = BlendMode.Overlay
-                    )
-                }
-
-            }
-    )
-
-
-
-}*/
 
 val navigationItems = listOf(
     NavigationItem(
@@ -649,6 +585,7 @@ fun SimpleVicoChart() {
     )
     val axisLabelComponent = rememberTextComponent(
         style = TextStyle(
+           
             color = Color(0xFFA6A6A6),
             fontFamily = FontFamily(Font(R.font.sfpro_bold)),
 
@@ -1227,9 +1164,13 @@ fun TaskRoute(
 
 
 @Composable
-fun ScoreTaskTimer( initialValue: Float = 0.1f,  totalTime: Long =60000L) {
+fun ScoreTaskTimer(   state: TimerState,
+                      onIntent: (TimerIntent) -> Unit,
+                      // الدالة المسؤولة عن النقل
+                      /* initialValue: Float = 0.1f,  totalTime: Long =60000L*/) {
 
-    var value by remember {
+
+  /*  var value by remember {
         mutableStateOf(initialValue)
     }
 
@@ -1240,16 +1181,19 @@ fun ScoreTaskTimer( initialValue: Float = 0.1f,  totalTime: Long =60000L) {
     // create variable for isTimerRunning
     var isTimerRunning by remember {
         mutableStateOf(true)
-    }
+    }*/
 
-    LaunchedEffect(key1 = currentTime, key2 = isTimerRunning) {
+
+   /* LaunchedEffect(key1 = currentTime, key2 = isTimerRunning) {
         if(currentTime > 0 && isTimerRunning) {
             delay(100L)
             currentTime -= 100L
             value = currentTime / totalTime.toFloat()
         }
-    }
+    }*/
 
+
+    /////////////////
     Box(modifier = Modifier.fillMaxSize().background(basePurple)) {}
     Box(
         modifier = Modifier
@@ -1341,22 +1285,22 @@ fun ScoreTaskTimer( initialValue: Float = 0.1f,  totalTime: Long =60000L) {
                     // brush = Brush.linearGradient(colorStops = scoreTaskTimerStops),
                     color =  Color(0xFF200C4E),//Color.Black,
                     startAngle = -90f,
-                    sweepAngle = value * 360f,//360f * progress,
+                    sweepAngle = state.value * 360f,//360f * progress,
                     useCenter = false,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
             }
 // 1. حساب الدقائق المتبقية
-            val minutes = (currentTime / 1000L) / 60
+           // val minutes = (currentTime / 1000L) / 60
 
 // 2. حساب الثواني المتبقية (باقي القسمة على 60 لتبدأ من 59 وتنازلياً)
-            val seconds = (currentTime / 1000L) % 60
+          //  val seconds = (currentTime / 1000L) % 60
 
 // 3. تنسيق النص ليظهر دائماً بخانتين (مثلاً الـ 5 ثواني تظهر 05 وليس 5)
-            val formattedTime = String.format("%02d:%02d", minutes, seconds)
+          //  val formattedTime = String.format("%02d:%02d", minutes, seconds)
             // 3. نص الوقت في المنتصف
             Text(
-                text =  formattedTime,//(currentTime / 1000L).toString(), //"45:00",
+                text = state.formattedTime,//(currentTime / 1000L).toString(), //"45:00",
                 style = TextStyle(
                     fontWeight = Black,
                     lineHeight = 11.sp,
@@ -1367,26 +1311,65 @@ fun ScoreTaskTimer( initialValue: Float = 0.1f,  totalTime: Long =60000L) {
                 color = Color.White, fontSize = 32.sp
             )
         }
+
         Spacer(modifier = Modifier.height(80.dp))
         Row(
             Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center
         ) {
 
-            Icon(
+            IconButton(
+                onClick = {
+                    if (state.isRunning) {
+                        onIntent(TimerIntent.PauseTimer)
+                    }else{
+                        onIntent(TimerIntent.StartTimer)
+
+                    }
+                },
+                modifier = Modifier.size(41.dp)
+            ) {
+                Icon(
+                    painter = painterResource(
+                        id = if (state.isRunning) R.drawable.pause_icon else R.drawable.icon_play
+                    ),
+                   // painter = painterResource(id = R.drawable.icon_play),
+                    contentDescription = "Start Timer",
+                    tint = Color.Unspecified, // أو أي لون يتماشى مع الثيم الخاص بكِ
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+           /* Icon (
                 painter = painterResource(id = R.drawable.icon_play), // اسم الملف الذي أنشأتِه
                 contentDescription = null,
                 tint = Color.Unspecified,
                 modifier = Modifier.size(41.dp)//.padding(top = 2.dp, start = 2.dp) // حجم ثابت كما اتفقنا
-            )
+            )*/
             Spacer(modifier = Modifier.width(80.dp))
 
 
-            Icon(
+            IconButton(
+                onClick = {
+                    onIntent(TimerIntent.ResetTimer)
+                },
+                modifier = Modifier.size(41.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.retry_icon),
+                    contentDescription = "Reset Timer",
+                    tint = Color.Unspecified, // أو أي لون يتماشى مع الثيم الخاص بكِ
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+         /*   Icon (
+
                 painter = painterResource(id = R.drawable.retry_icon), // اسم الملف الذي أنشأتِه
                 contentDescription = null,
                 modifier = Modifier.size(41.dp)//.padding(top = 2.dp, start = 2.dp) // حجم ثابت كما اتفقنا
-            )
+            )*/
+
         }
     }
 
@@ -2349,8 +2332,8 @@ fun EnterTask(
 @Composable
 fun EnterExpectTime(
     state: TaskCreationState,
-
-    onIntent: (TaskIntent) -> Unit
+    onIntent: (TaskIntent) -> Unit,
+    onNavigateToTimer: () -> Unit = {}
 ){
     val context = LocalContext.current
     Card(
@@ -2463,6 +2446,8 @@ fun EnterExpectTime(
                       //  Log.i("testButton::First",inputHolder.title)
                        if (state.title.isNotEmpty()) {
                             onIntent (TaskIntent.SaveTask)
+                               onNavigateToTimer ()
+                         //  ScoreRoute(viewModel)
                            Toast.makeText(context, "The task has been successfully saved.", Toast.LENGTH_SHORT).show()
 
 
@@ -2480,22 +2465,37 @@ fun EnterExpectTime(
         }
     }
 }
+@Composable
+fun ScoreRoute(
+    viewModel: TimerViewModel
+) {
+    val state by viewModel.state.collectAsState()
+
+    ScoreTaskTimer (
+        state = state,
+        onIntent = viewModel::onIntent
+    )
+}
 
 
 @Composable
 fun HomeRoute(
+    onNavigateToTimer: () -> Unit = {},
     viewModel: TaskViewModel
 ) {
     val state by viewModel.state.collectAsState()
 
     HomeScreen(
+        onNavigateToTimer = onNavigateToTimer,
         state = state,
         onIntent = viewModel::onIntent
     )
 }
+
+
 @Composable
 fun HomeScreen(
-
+    onNavigateToTimer: () -> Unit = {},
     state: TaskCreationState,
     onIntent: (TaskIntent) -> Unit
 
@@ -2535,6 +2535,7 @@ fun HomeScreen(
 
 
             EnterExpectTime(
+                onNavigateToTimer = onNavigateToTimer,
                 state = state,
                 onIntent = onIntent
             )
@@ -2728,13 +2729,12 @@ fun SplashBackground(
     }
 
     @Composable
-    fun SplashScreen(navController: NavController) {
+    fun SplashScreen(onTimeout: () -> Unit) {
         // 1. إدارة منطق التوقيت والانتقال
         LaunchedEffect(Unit) {
             delay(1000)
-            navController.navigate(Screen.Onboarding.route) {
-                popUpTo(Screen.Splash.route) { inclusive = true }
-            }
+            onTimeout()
+
         }
 
         // 2. تجميع الشاشة: نضع الخلفية وبداخلها المحتوى
