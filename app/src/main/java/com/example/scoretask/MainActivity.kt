@@ -1,6 +1,9 @@
 package com.example.scoretask
 
-
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import android.R.attr.centerX
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -133,6 +136,8 @@ import kotlinx.coroutines.delay
 import kotlin.collections.minusAssign
 import kotlin.compareTo
 import kotlin.div
+import androidx.compose.material3.Checkbox
+import androidx.compose.ui.draw.shadow
 import kotlin.text.toFloat
 
 class MainActivity : ComponentActivity() {
@@ -212,8 +217,12 @@ class MainActivity : ComponentActivity() {
                             factory = TimerViewModelFactory(repository)
                         )
 
-                        ScoreRoute(timerViewModel)
+                        ScoreRoute(timerViewModel, rootNavController)
                     }
+                    composable (route = Screen.TaskCompletion.route){//TaskCompletion.route){
+                        TaskCompletion()
+                    }
+
 
 
 
@@ -900,6 +909,625 @@ fun ScreenHeader (
 }
 /*
 @Composable
+fun RowCard(
+    title: String,             // نمرر النص هنا
+    iconResId: Int
+) {
+    var isChecked by remember { mutableStateOf(true) }
+
+    Row(
+        Modifier.padding(start = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(id = iconResId/*R.drawable.img_finish*/),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier.width(61.dp).height(41.dp).padding(start = 8.dp)
+
+        )
+
+        Text(
+            title,
+            color = Color.White,
+            fontSize = 14.sp,
+            lineHeight = 11.sp,
+            modifier = Modifier.weight(1f),
+            fontFamily = FontFamily(Font(R.font.sfpro_regular)),
+            fontWeight = FontWeight.Bold,
+
+            )
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = { isChecked = it },
+
+            )
+
+    }
+}*/
+
+enum class TaskResultStatus(val title: String) {
+    FINISH("Finish"),
+    FINISH_EXTRA("Finish - (Need extra time)"),
+    NOT_FINISH("Not Finish"),
+    NOT_FINISH_EXTRA("Not Finish - (Need extra time)");
+
+    // دالة ترجع السؤال المناسب لكل حالة
+    fun getQuestion(): String {
+        return when (this) {
+           // FINISH -> "Great job! Do you need a buffer time to review your achievement?"
+            FINISH_EXTRA -> "How much extra time do you need to completely wrap it up?"
+            NOT_FINISH -> "It's okay! How much extra time do you need for the next session?"
+            NOT_FINISH_EXTRA -> "Don't panic! Select the extra time needed to continue now:"
+        }
+    }
+
+    fun getPsychologyOptions(): List<String> {
+        return when (this) {
+            FINISH_EXTRA-> emptyList()
+                    //  FINISH -> emptyList()
+           /* FINISH_EXTRA -> listOf(
+                "🧩 Task was more complex than expected",
+                "📝 Need extra polish / double-check",
+                "⏳ Underestimated the required sub-tasks"
+            )*/
+            NOT_FINISH -> listOf(
+                "🥱 I lost momentum / got distracted",
+                "🧠 Cognitive fatigue / brain fog",
+                "🛑 Hit a hard roadblock / got stuck"
+            )
+            NOT_FINISH_EXTRA -> listOf(
+                "⚡ Unexpected friction or technical bug",
+                "📱 Environment / notification distraction",
+                "🔄 Perfectionism holding me back"
+            )
+        }
+    }
+
+    // دالة ترجع خيارات الوقت بالدقائق لكل حالة (ديناميكية)
+    fun getDurationOptions(): List<Int> {
+        return when (this) {
+           // FINISH -> listOf(5, 10) // وقت بسيط للمراجعة
+            FINISH_EXTRA -> listOf(10, 15, 20, 30) // وقت متوسط للتقفيل
+            NOT_FINISH ->emptyList()// listOf(15, 30, 45, 60) // وقت كبير لجلسة تانية
+            NOT_FINISH_EXTRA -> listOf(20, 30, 40, 50)
+        }
+    }
+}
+@Composable
+fun RowCard(
+    title: String,
+    iconResId: Int,
+    isSelected: Boolean,      // يحدد برمجياً هل هذا الصف هو المختار حالياً أم لا
+    onClick: () -> Unit       // الأكشن الذي ينطلق عند الضغط على الصف بالكامل
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() } // الكارد بالكامل أصبح قابل للنقر لتسهيل تجربة الاستخدام
+            .background(
+                // إذا تم اختياره، نعطيه خلفية بيضاء شفافة بنسبة 15% كمؤشر بصري، وإلا يظل شفافاً
+                color = if (isSelected) Color.White.copy(alpha = 0.15f) else Color.Transparent,
+                shape = RoundedCornerShape(9.dp)
+            )
+            .padding(vertical = 6.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // 1. الأيقونة الخاصة بالحالة (Finish, Not Finish...)
+        Icon(
+            painter = painterResource(id = iconResId),
+            contentDescription = null,
+            tint = Color.Unspecified, // للحفاظ على ألوان الأيقونة الأصلية كما هي
+            modifier = Modifier
+                .width(61.dp)
+                .height(41.dp)
+                .padding(start = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        // 2. نص الحالة
+        Text(
+            text = title,
+            color = Color.White,
+            fontSize = 14.sp,
+            lineHeight = 11.sp,
+            modifier = Modifier.weight(1f),
+            fontFamily = FontFamily(Font(R.font.sfpro_regular)),
+            fontWeight = FontWeight.Bold,
+        )
+
+        // 3. بديل الـ Checkbox: أيقونة "صح" تظهر فقط إذا كان هذا الصف هو المختار حالياً
+        if (isSelected) {
+            Icon(
+                painter = painterResource(id = R.drawable.bottom_icon), // يمكنك استخدام أيقونة سهم أو صح متاحة لديكِ
+                contentDescription = "Selected Indicator",
+                tint = Color.White,
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .size(16.dp)
+            )
+        } else {
+            // مساحة فارغة بديلة للحفاظ على محاذاة العناصر إذا لم يكن مختاراً
+            Spacer(modifier = Modifier.padding(end = 12.dp).size(16.dp))
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaskCompletion() {
+    // 2️⃣ الـ States الناقصة للتحكم في الاختيارات والـ Bottom Sheet
+    var selectedStatus by remember { mutableStateOf<TaskResultStatus?>(null) }
+    var selectedExtraTime by remember { mutableStateOf<Int?>(null) }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedPsychologyReason by remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState()
+
+    BgScreen() // الخلفية الخاصة بكِ
+
+    // تم تصليح الـ Column وفتح القوس المظبوط {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(Modifier.height(50.dp))
+
+        // الـ Header المخصص بتاعكِ
+        ScreenHeader("ReadingSeationnnn", showEditButton = false)
+
+        Spacer(Modifier.height(50.dp))
+
+        // شارة الـ Time out البيضاء
+        Text(
+            text = "Time out",
+            modifier = Modifier
+                .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
+                .background(color = Color.White, shape = RoundedCornerShape(20.dp))
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .wrapContentSize(),
+            color = Color(0xFFFF110D),
+            fontSize = 20.sp,
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            style = TextStyle(
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both
+                ),
+                fontWeight = FontWeight.Bold,
+                platformStyle = PlatformTextStyle(includeFontPadding = false)
+            )
+        )
+
+        Spacer(Modifier.height(40.dp))
+
+        // نص التايمر باصفار
+        Text(
+            text = "00:00",
+            color = Color.White,
+            fontSize = 32.sp,
+            letterSpacing = 1.sp,
+            lineHeight = 11.sp,
+            fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+            style = TextStyle(
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both
+                ),
+                fontWeight = FontWeight.Bold,
+                platformStyle = PlatformTextStyle(includeFontPadding = false)
+            )
+        )
+
+        Spacer(Modifier.height(60.dp))
+
+        // سؤال النص السفلي والـ Arrow icon
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Are you finish your Task ?",
+                modifier = Modifier.padding(start = 50.dp),
+                color = Color.White,
+                fontSize = 12.sp,
+                letterSpacing = 1.sp,
+                lineHeight = 11.sp,
+                fontFamily = FontFamily(Font(R.font.sfpro_regular)),
+                style = TextStyle(
+                    lineHeightStyle = LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.Both
+                    ),
+                    fontWeight = FontWeight.Bold,
+                    platformStyle = PlatformTextStyle(includeFontPadding = false)
+                )
+            )
+
+            IconButton(
+                onClick = { /* العودة للخلف */ },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.bottom_icon),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.width(11.dp).height(20.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        // إعدادات الجراديانت الخاص بالكارد بتاعكِ
+        val startColor = Color(0xFF6347A4).copy(alpha = 0.2f)
+        val endColor = Color(0xFF000000).copy(alpha = 0.2f)
+        val gradientBrush = Brush.linearGradient(
+            colors = listOf(startColor, endColor),
+            start = Offset(0f, 0f),
+            end = Offset(Float.POSITIVE_INFINITY, 0f)
+        )
+
+        // كارد الخيارات الرئيسي
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .wrapContentHeight()
+                .background(brush = gradientBrush, shape = RoundedCornerShape(9.dp))
+                .padding(bottom = 24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        ) {
+            Column(
+                modifier = Modifier.padding(top = 5.dp, start = 4.dp, end = 4.dp, bottom = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // 3️⃣ ربط الكروت ديناميكياً بالـ الـ الـ Single-Selection والـ Bottom Sheet
+                TaskResultStatus.values().forEach { status ->
+                    val iconRes = when(status) {
+                        TaskResultStatus.FINISH -> R.drawable.img_finish
+                        TaskResultStatus.FINISH_EXTRA -> R.drawable.img_finish_need_extra_time
+                        TaskResultStatus.NOT_FINISH -> R.drawable.img_finish
+                        TaskResultStatus.NOT_FINISH_EXTRA -> R.drawable.img_not_finish
+                    }
+
+                    RowCard(
+                        title = status.title,
+                        iconResId = iconRes,
+                        isSelected = selectedStatus == status,
+                        onClick = {
+                            selectedStatus = status
+                            selectedExtraTime = null // ريست للوقت القديم لو اختار حالة تانية
+                            selectedPsychologyReason = null
+                            showBottomSheet = true  // افتح الستارة فوراً!
+                        }
+                    )
+                }
+            }
+        }
+    } // نهاية الـ Column الرئيسي
+
+    // 4️⃣ الـ Modal Bottom Sheet المفقود (الستارة اللي بتظهر من تحت)
+    if (showBottomSheet && selectedStatus != null) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = Color(0xFF1C1B2B), // لون داكن متناسق مع تطبيقكِ
+            dragHandle = { BottomSheetDefaults.DragHandle(color = Color.White.copy(alpha = 0.4f)) }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // عرض السؤال المناسب للحالة المختارة
+                Text(
+                    text = selectedStatus!!.getQuestion(),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
+
+                if (selectedStatus != TaskResultStatus.FINISH) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        selectedStatus!!.getPsychologyOptions().forEach { reason ->
+                            val isReasonSelected = selectedPsychologyReason == reason
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        color = if (isReasonSelected) Color(0xFF8C5BFF).copy(alpha = 0.2f) else Color.White.copy(
+                                            alpha = 0.05f
+                                        ),
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isReasonSelected) Color(0xFF8C5BFF) else Color.Transparent,
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .clickable { selectedPsychologyReason = reason }
+                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                            ) {
+                                Text(
+                                    text = reason,
+                                    color = if (isReasonSelected) Color.White else Color.White.copy(
+                                        alpha = 0.7f
+                                    ),
+                                    fontSize = 13.sp,
+                                    fontWeight = if (isReasonSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // عرض دوائر اختيار الدقائق
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(bottom = 32.dp)
+                ) {
+                    selectedStatus!!.getDurationOptions().forEach { minutes ->
+                        val isTimeSelected = selectedExtraTime == minutes
+
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .shadow(if (isTimeSelected) 4.dp else 0.dp, CircleShape)
+                                .background(
+                                    color = if (isTimeSelected) Color(0xFF8C5BFF) else Color.White.copy(alpha = 0.1f),
+                                    shape = CircleShape
+                                )
+                                .clickable { selectedExtraTime = minutes },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "+$minutes\nm",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+
+                val isConfirmEnabled = if (selectedStatus == TaskResultStatus.FINISH) {
+                    selectedExtraTime != null
+                } else {
+                    selectedExtraTime != null && selectedPsychologyReason != null
+                }
+
+                // زرار التأكيد النهائي
+                //
+                // للـ Bottom Sheet
+                Button(
+                    onClick = {
+                        showBottomSheet = false
+
+                        // TODO: هنا أرسلي الـ `selectedStatus` والـ `selectedExtraTime` للـ ViewModel
+                    },
+                   // enabled = selectedExtraTime != null, // لا ينقر إلا بعد تحديد الوقت
+                    enabled = isConfirmEnabled,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Text("Confirm Selection", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+/*
+@Composable
+fun TaskCompletion() {
+
+    BgScreen()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+
+        {
+
+            Spacer(Modifier.height(50.dp))
+
+            ScreenHeader("ReadingSeationnnn", showEditButton = false)
+
+            Spacer(Modifier.height(50.dp))
+
+            /*   Text(
+                text = "Time out",
+                color = Color.Red, // اللون الأحمر كما في الصورة
+                style = TextStyle(
+                    fontFamily = FontFamily.SansSerif, // أو الخط الذي تستخدمينه
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    platformStyle = PlatformTextStyle(includeFontPadding = false),
+
+
+                )
+            )*/
+
+
+               /* Surface(
+                    modifier = Modifier
+                        .wrapContentSize(),
+
+                    // 260 / 2
+                       // .height(36.dp), // 73 / 2
+                    shape = CircleShape, // لجعل الحواف دائرية تماماً مثل الصورة
+                    color = Color.White, // الخلفية البيضاء كما في السكرين
+                    shadowElevation = 4.dp // إضافة ظل خفيف ليعطي عمق للزر فوق الخلفية البنفسجية
+                ) {*/
+
+
+                  /*  Box(
+                        contentAlignment = Alignment.Center,
+                        //color = Color.White,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {*/
+                        Text(
+                            text = "Time out",
+                            modifier = Modifier
+                          //  .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
+                        // 2. الخلفية البيضاء مع الشكل
+                        .background(color = Color.White, shape = RoundedCornerShape(20.dp))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                           // color = Color(0xFFFF110D), //CircleShape, // لجعل الحواف دائرية تماماً مثل الصورة
+                        .wrapContentSize(),
+
+                            color = Color(0xFFFF110D),
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                            style = TextStyle(
+                                lineHeightStyle = LineHeightStyle(
+                                    alignment = LineHeightStyle.Alignment.Center,
+                                    trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
+                                ),
+                                fontWeight = FontWeight.Bold,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false) // يضمن توسيطاً دقيقاً
+                            )
+
+                        )
+                   // }
+               // }
+            Spacer(Modifier.height(40.dp))
+            Text(
+                text = "00:00",
+                //modifier = Modifier
+                color = Color.White,
+                fontSize = 32.sp,
+                letterSpacing = 1.sp,
+                lineHeight = 11.sp,
+
+                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+                style = TextStyle(
+                    lineHeightStyle = LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
+                    ),
+                    fontWeight = FontWeight.Bold,
+
+                    platformStyle = PlatformTextStyle(includeFontPadding = false) // يضمن توسيطاً دقيقاً
+                )
+
+            )
+          Spacer(Modifier.height(60.dp))
+            Row(
+
+                verticalAlignment = Alignment.CenterVertically,
+
+                ) {
+                Text(
+                    text = "Are you finish your Task ?",
+                      Modifier.padding(start =50.dp),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    letterSpacing = 1.sp,
+                    lineHeight = 11.sp,
+
+                    fontFamily = FontFamily(Font(R.font.sfpro_regular)),
+                    style = TextStyle(
+
+                        lineHeightStyle = LineHeightStyle(
+                            alignment = LineHeightStyle.Alignment.Center,
+                            trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
+                        ),
+                        fontWeight = FontWeight.Bold,
+
+                        platformStyle = PlatformTextStyle(includeFontPadding = false) // يضمن توسيطاً دقيقاً
+                    )
+
+                )
+
+                IconButton(
+                    onClick = { /* العودة للخلف */ },
+
+                    modifier = Modifier.size(48.dp)
+                ) {
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.bottom_icon),
+                        contentDescription = null,
+
+                        tint = Color.White,
+
+                        modifier = Modifier.width(11.dp).height(20.dp)
+
+                    )
+                }
+
+            }//endRowAre
+          Spacer(Modifier.height(10.dp))
+
+            // 1. تعريف الألوان مع الشفافية (0.2 alpha تعادل 20% opacity)
+            val startColor = Color(0xFF6347A4).copy(alpha = 0.2f)
+            val endColor = Color(0xFF000000).copy(alpha = 0.2f)
+
+// 2. إنشاء التدرج (90 درجة تعادل تدرج أفقي من اليسار لليمين)
+            val gradientBrush = Brush.linearGradient(
+                colors = listOf(startColor, endColor),
+                start = Offset(0f, 0f),
+                end = Offset(Float.POSITIVE_INFINITY, 0f) // يمتد لنهاية العرض أفقياً
+            )
+            Card(
+                modifier = Modifier
+                    .background(basePurple)
+                    .fillMaxWidth(0.8f) // تأخذ 90% من عرض أي شاشة
+                    .wrapContentHeight()
+
+                    .background(brush = gradientBrush, shape = RoundedCornerShape(9.dp))
+                    // ملاحظة: الـ top و left في فيجما يتم ترجمتهما عادةً كـ Padding أو كجزء من ترتيب العناصر في الـ Column/Row
+                    //.padding( start = 2.dp,top =5.dp),
+                .padding(bottom = 24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Transparent // إزالة اللون الافتراضي نهائياً
+                ),
+              /*  border = BorderStroke(
+                    width = 0.5.dp, // 1px / 2
+                    color = Color(0xFFAD8AFF).copy(alpha = 0.18f) // تحويل الشفافية 2E إلى حوالي 0.18f
+                )*/
+               // border = BorderStroke(0.5.dp, Color(0xFF6347A4)),//.copy(alpha = 0.5f)) // 1px / 2 مع شفافية بسيطة
+            ) {
+                Column(
+                    modifier = Modifier
+                        // .wrapContentHeight()
+                        .padding(top = 5.dp), // مسافة داخلية لتنظيم العناصر
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    // هنا تضعين صفوف الـ Checkbox (Finish, Not Finish...)
+
+                    RowCard("Finish",R.drawable.img_finish)
+                    RowCard("Finish-(Need extra time)",R.drawable.img_finish_need_extra_time)
+                    RowCard("Not Finish",R.drawable.img_finish)
+                    RowCard("Not Finish-(Need extra time)",R.drawable.img_not_finish)
+
+
+                   /* Checkbox(
+
+                        checked = isChecked,
+                        onCheckedChange = { isChecked = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Color.White,       // اللون عند الاختيار
+                            uncheckedColor = Color.LightGray  // اللون عند عدم الاختيار
+                        )
+                    )*/
+
+                }//////end colum card
+            }
+            }//end colum
+        }*/
+
+/*
+@Composable
 fun ScreenHeader() {
     Row(
 
@@ -941,14 +1569,14 @@ fun ScreenHeader() {
                     trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
                 ),
                 fontWeight = Black,// FontWeight(860),
-                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-
-                )
-
-
-        )
-    }
-}*/
+//                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+//
+//                )
+//
+//
+//        )
+//    }
+//}*/
 
 @Composable
 fun TodayOverviewCard() {
@@ -2467,14 +3095,27 @@ fun EnterExpectTime(
 }
 @Composable
 fun ScoreRoute(
-    viewModel: TimerViewModel
+    viewModel: TimerViewModel,
+    navController: NavController
 ) {
-    val state by viewModel.state.collectAsState()
+   // val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(key1 = state.currentTime) {
+        // إذا كان التايمر وصل لصفر (أو أقل من أو يساوي صفر للأمان البرمجي)
+        if (state.currentTime <= 0.0) {
+            navController.navigate(Screen.TaskCompletion.route) {
+                // بنمسح شاشة التايمر من الـ BackStack عشان لو المستخدم داس زرار الرجوع ميرجعش للتايمر الميت
+                popUpTo(Screen.TimerTask.route) { inclusive = true }
+            }
+        }
+    }
     ScoreTaskTimer (
         state = state,
         onIntent = viewModel::onIntent
     )
+
+
 }
 
 

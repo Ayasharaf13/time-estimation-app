@@ -7,8 +7,8 @@ sealed   class Screen (val route:String) {
      object MainHome : Screen("main_home_screen")
      object Task: Screen("task_screen")
      object Stats: Screen("stats_screen")
-
      object TimerTask: Screen("timer_screen")
+     object TaskCompletion:Screen ("task_completion")
 
 
 }

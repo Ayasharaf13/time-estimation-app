@@ -14,8 +14,8 @@ package com.example.scoretask
 
 
     data class TimerState(
-    val currentTime: Long = 0L,//60_000L,
-    val totalTime: Long = 0L,//60_000L,
+    val currentTime: Long = 6000L,//60_000L,
+    val totalTime: Long = 6000L,//60_000L,
     val isRunning: Boolean = false,
      val value : Float = 0.0f
 ) {
