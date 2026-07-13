@@ -1,5 +1,7 @@
 package com.example.scoretask
 
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.BottomSheetDefaults
@@ -219,8 +221,16 @@ class MainActivity : ComponentActivity() {
 
                         ScoreRoute(timerViewModel, rootNavController)
                     }
-                    composable (route = Screen.TaskCompletion.route){//TaskCompletion.route){
-                        TaskCompletion()
+                    composable(
+                        route = "${Screen.TaskCompletion.route}/{expectedTime}",
+                    arguments = listOf(navArgument("expectedTime") { type = NavType.IntType })//(route = Screen.TaskCompletion.route){//TaskCompletion.route){
+                    ) { backStackEntry ->
+                        // استخراج القيمة بأمان
+                        val expectedTime = backStackEntry.arguments?.getInt("expectedTime") ?: 0
+
+                        // باصي الرقم لشاشتكِ الجميلة
+                        TaskCompletion(expectedTime)
+
                     }
 
 
@@ -955,16 +965,19 @@ enum class TaskResultStatus(val title: String) {
     // دالة ترجع السؤال المناسب لكل حالة
     fun getQuestion(): String {
         return when (this) {
-           // FINISH -> "Great job! Do you need a buffer time to review your achievement?"
+
+            // FINISH -> "Great job! Do you need a buffer time to review your achievement?"
             FINISH_EXTRA -> "How much extra time do you need to completely wrap it up?"
             NOT_FINISH -> "It's okay! How much extra time do you need for the next session?"
             NOT_FINISH_EXTRA -> "Don't panic! Select the extra time needed to continue now:"
+            else -> error("Finish status should not trigger the bottom sheet question")
         }
     }
 
     fun getPsychologyOptions(): List<String> {
         return when (this) {
             FINISH_EXTRA-> emptyList()
+
                     //  FINISH -> emptyList()
            /* FINISH_EXTRA -> listOf(
                 "🧩 Task was more complex than expected",
@@ -981,16 +994,32 @@ enum class TaskResultStatus(val title: String) {
                 "📱 Environment / notification distraction",
                 "🔄 Perfectionism holding me back"
             )
+
+            else -> emptyList()
         }
     }
 
     // دالة ترجع خيارات الوقت بالدقائق لكل حالة (ديناميكية)
-    fun getDurationOptions(): List<Int> {
+    fun getDurationOptions(expectTime: Int): List<Int> {
+        val halfTime = (expectTime / 2).coerceAtLeast(5)
         return when (this) {
+
            // FINISH -> listOf(5, 10) // وقت بسيط للمراجعة
-            FINISH_EXTRA -> listOf(10, 15, 20, 30) // وقت متوسط للتقفيل
+            FINISH_EXTRA -> {
+                val op1 = (halfTime - 5).coerceAtLeast(halfTime + 10) 
+                val op2 = halfTime
+                val op3 = halfTime + 5
+                listOf(op1, op2, op3)
+            }
             NOT_FINISH ->emptyList()// listOf(15, 30, 45, 60) // وقت كبير لجلسة تانية
-            NOT_FINISH_EXTRA -> listOf(20, 30, 40, 50)
+
+           NOT_FINISH_EXTRA -> {
+               val op1 = halfTime
+               val op2 = halfTime + 10
+               val op3 = halfTime + 20
+               listOf(op1, op2, op3)
+           }
+            else -> emptyList()
         }
     }
 }
@@ -998,7 +1027,8 @@ enum class TaskResultStatus(val title: String) {
 fun RowCard(
     title: String,
     iconResId: Int,
-    isSelected: Boolean,      // يحدد برمجياً هل هذا الصف هو المختار حالياً أم لا
+    isSelected: Boolean,
+    showArrow:Boolean,// يحدد برمجياً هل هذا الصف هو المختار حالياً أم لا
     onClick: () -> Unit       // الأكشن الذي ينطلق عند الضغط على الصف بالكامل
 ) {
     Row(
@@ -1022,6 +1052,7 @@ fun RowCard(
                 .width(61.dp)
                 .height(41.dp)
                 .padding(start = 8.dp)
+
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -1038,7 +1069,8 @@ fun RowCard(
         )
 
         // 3. بديل الـ Checkbox: أيقونة "صح" تظهر فقط إذا كان هذا الصف هو المختار حالياً
-        if (isSelected) {
+       if (isSelected) {
+        
             Icon(
                 painter = painterResource(id = R.drawable.bottom_icon), // يمكنك استخدام أيقونة سهم أو صح متاحة لديكِ
                 contentDescription = "Selected Indicator",
@@ -1046,6 +1078,7 @@ fun RowCard(
                 modifier = Modifier
                     .padding(end = 12.dp)
                     .size(16.dp)
+                    .graphicsLayer(alpha = if (showArrow) 1f else 0f)
             )
         } else {
             // مساحة فارغة بديلة للحفاظ على محاذاة العناصر إذا لم يكن مختاراً
@@ -1055,7 +1088,7 @@ fun RowCard(
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskCompletion() {
+fun TaskCompletion( expectTime:Int) {
     // 2️⃣ الـ States الناقصة للتحكم في الاختيارات والـ Bottom Sheet
     var selectedStatus by remember { mutableStateOf<TaskResultStatus?>(null) }
     var selectedExtraTime by remember { mutableStateOf<Int?>(null) }
@@ -1192,11 +1225,17 @@ fun TaskCompletion() {
                         title = status.title,
                         iconResId = iconRes,
                         isSelected = selectedStatus == status,
+                        showArrow = (status != TaskResultStatus.FINISH),
                         onClick = {
+                            if (status != TaskResultStatus.FINISH) {
+                                showBottomSheet = true
+                            } else {
+                                showBottomSheet = false // حماية عشان الستارة متفتحش لو كانت مفتوحة
+                            }
                             selectedStatus = status
                             selectedExtraTime = null // ريست للوقت القديم لو اختار حالة تانية
                             selectedPsychologyReason = null
-                            showBottomSheet = true  // افتح الستارة فوراً!
+                           // showBottomSheet = true  // افتح الستارة فوراً!
                         }
                     )
                 }
@@ -1205,7 +1244,8 @@ fun TaskCompletion() {
     } // نهاية الـ Column الرئيسي
 
     // 4️⃣ الـ Modal Bottom Sheet المفقود (الستارة اللي بتظهر من تحت)
-    if (showBottomSheet && selectedStatus != null) {
+   // if (showBottomSheet && selectedStatus != null) {
+    if (showBottomSheet && selectedStatus != null && selectedStatus != TaskResultStatus.FINISH) {
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },
             sheetState = sheetState,
@@ -1220,7 +1260,7 @@ fun TaskCompletion() {
             ) {
                 // عرض السؤال المناسب للحالة المختارة
                 Text(
-                    text = selectedStatus!!.getQuestion(),
+                    text = selectedStatus?.getQuestion()?:"",
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -1272,7 +1312,7 @@ fun TaskCompletion() {
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.padding(bottom = 32.dp)
                 ) {
-                    selectedStatus!!.getDurationOptions().forEach { minutes ->
+                    selectedStatus!!.getDurationOptions(expectTime).forEach { minutes ->
                         val isTimeSelected = selectedExtraTime == minutes
 
                         Box(
@@ -3100,11 +3140,14 @@ fun ScoreRoute(
 ) {
    // val state by viewModel.state.collectAsState()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val expectedTime = state.totalTimeInMinutes // 👈 غيري الاسم حسب المتغير عندك في الـ state
+    // 2. نمرره في الـ Route بالشكل ده:
 
     LaunchedEffect(key1 = state.currentTime) {
         // إذا كان التايمر وصل لصفر (أو أقل من أو يساوي صفر للأمان البرمجي)
         if (state.currentTime <= 0.0) {
-            navController.navigate(Screen.TaskCompletion.route) {
+           // navController.navigate(Screen.TaskCompletion.route) {
+            navController.navigate("${Screen.TaskCompletion.route}/$expectedTime"){
                 // بنمسح شاشة التايمر من الـ BackStack عشان لو المستخدم داس زرار الرجوع ميرجعش للتايمر الميت
                 popUpTo(Screen.TimerTask.route) { inclusive = true }
             }

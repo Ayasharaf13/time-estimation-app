@@ -31,6 +31,9 @@ package com.example.scoretask
             val seconds = totalSeconds % 60
             return String.format("%02d:%02d", minutes, seconds)
         }
+
+        val totalTimeInMinutes: Int
+            get() = (totalTime / 1000L / 60L).toInt()
 }
 
 
