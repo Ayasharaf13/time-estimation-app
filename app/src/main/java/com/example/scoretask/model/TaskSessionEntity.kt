@@ -52,7 +52,7 @@ data class TaskSessionEntity(
     val completedAt: Long? = null,
 
     @ColumnInfo(name = "status")
-    val status: SessionStatus = SessionStatus.NOT_STARTED,
+    val status: SessionStatus = SessionStatus.IDLE,
 
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
@@ -62,8 +62,8 @@ data class TaskSessionEntity(
 )
 
 enum class SessionStatus {
-    NOT_STARTED,
-    RUNNING,
-    COMPLETED,
-    CANCELLED
+    IDLE,      // التايمر واقف أو لسه معمول له Reset
+    RUNNING,   // التايمر شغال وبيعد تنازلي
+    PAUSED,    // التايمر موقوف مؤقتاً
+    FINISHED   // التايمر انتهى طبيعياً ووصل لـ 00:00
 }

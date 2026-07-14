@@ -1,5 +1,6 @@
 package com.example.scoretask
 
+import com.example.scoretask.model.SessionStatus
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -1006,7 +1007,7 @@ enum class TaskResultStatus(val title: String) {
 
            // FINISH -> listOf(5, 10) // وقت بسيط للمراجعة
             FINISH_EXTRA -> {
-                val op1 = (halfTime - 5).coerceAtLeast(halfTime + 10) 
+                val op1 = (halfTime - 5).coerceAtLeast(halfTime + 10)
                 val op2 = halfTime
                 val op3 = halfTime + 5
                 listOf(op1, op2, op3)
@@ -1687,7 +1688,7 @@ fun TodayOverviewCard() {
                     color = Color.White
                 )
                 Text(
-                    text = "Tasks Done",
+                    text = "work session done",
                     fontSize = 8.sp,
                     fontFamily = FontFamily(Font(R.font.sfpro_regular)),
                     color = Color.White.copy(alpha = 0.6f)
@@ -3143,9 +3144,10 @@ fun ScoreRoute(
     val expectedTime = state.totalTimeInMinutes // 👈 غيري الاسم حسب المتغير عندك في الـ state
     // 2. نمرره في الـ Route بالشكل ده:
 
-    LaunchedEffect(key1 = state.currentTime) {
+    LaunchedEffect(key1 = state.status) {
         // إذا كان التايمر وصل لصفر (أو أقل من أو يساوي صفر للأمان البرمجي)
-        if (state.currentTime <= 0.0) {
+      //  if (state.currentTime <= 0.0) {
+        if (state.status == SessionStatus.FINISHED) {
            // navController.navigate(Screen.TaskCompletion.route) {
             navController.navigate("${Screen.TaskCompletion.route}/$expectedTime"){
                 // بنمسح شاشة التايمر من الـ BackStack عشان لو المستخدم داس زرار الرجوع ميرجعش للتايمر الميت

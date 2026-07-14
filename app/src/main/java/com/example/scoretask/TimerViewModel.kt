@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.example.scoretask.model.SessionStatus
 
 class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
@@ -56,9 +57,18 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
         if (_state.value.isRunning) return
 
+
+        if (_state.value.currentTime <= 0L) {
+            // يمكنك توجيهه للتقفيل مباشرة أو عدم فعل شيء لمنع الـ Bug
+           // onTimerSuccessfullyFinished()
+            return
+        }
+
+
+
         _state.update {
 
-            it.copy(isRunning = true)
+            it.copy(status = SessionStatus.RUNNING)
 
         }
 
@@ -71,7 +81,7 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
                 delay(100)
 
                 val newTime =
-                    _state.value.currentTime  - 100
+                    _state.value.currentTime - 100
 
                 _state.update {
                     it.copy(
@@ -83,16 +93,33 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
             }
 
+
+
+            if (_state.value.currentTime <= 0) {
+                onTimerSuccessfullyFinished()
+            }
         }
 
     }
 
 
+    private fun onTimerSuccessfullyFinished() {
+        timerJob?.cancel() // تأمين لإيقاف الـ Job
+
+        _state.update {
+            it.copy(
+                status = SessionStatus.FINISHED,
+                currentTime = 0L,
+                value = 0f
+            )
+        }
+    }
+
     private fun pauseTimer() {
         timerJob?.cancel()
 
         _state.update {
-            it.copy(isRunning = false)
+            it.copy(status = SessionStatus.PAUSED)
         }
     }
 

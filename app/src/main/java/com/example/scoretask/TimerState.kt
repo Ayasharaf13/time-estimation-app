@@ -1,5 +1,6 @@
 package com.example.scoretask
 
+import com.example.scoretask.model.SessionStatus
 
 
 
@@ -14,15 +15,16 @@ package com.example.scoretask
 
 
     data class TimerState(
-    val currentTime: Long = 6000L,//60_000L,
-    val totalTime: Long = 6000L,//60_000L,
-    val isRunning: Boolean = false,
+    val currentTime: Long = 0L,
+    val totalTime: Long = 0L,
+    val status: SessionStatus = SessionStatus.IDLE,
      val value : Float = 0.0f
 ) {
     // 💡 يُحسب تلقائياً بمجرد قراءة الـ State دون الحاجة لتحديثه يدوياً في الـ ViewModel
     val progress: Float
         get() = if (totalTime > 0) value * 360f else 0f//currentTime.toFloat() / totalTime.toFloat() else 0f
 
+        val isRunning: Boolean get() = status ==  SessionStatus.RUNNING
     // 💡 النص جاهز تماماً للـ Text Composable بدون أي منطق رياضي بالشاشة
     val formattedTime: String
         get() {
