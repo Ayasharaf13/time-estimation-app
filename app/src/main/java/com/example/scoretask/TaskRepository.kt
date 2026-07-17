@@ -1,5 +1,7 @@
 package com.example.scoretask
 
+import com.example.scoretask.model.SessionStatus
+import com.example.scoretask.model.TaskSessionEntity
 import com.example.scoretask.model.TaskTemplateEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -15,4 +17,15 @@ interface TaskRepository {
     suspend fun isTitleExists(title: String): Boolean
 
     suspend fun deleteTaskById(taskId: Long): Int
+
+
+    suspend fun insertSession(session: TaskSessionEntity): Long
+
+    suspend fun updateSession(session: TaskSessionEntity)
+
+    fun getSessionCountForDay(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: SessionStatus = SessionStatus.IDLE
+    ): Flow<Int>
 }

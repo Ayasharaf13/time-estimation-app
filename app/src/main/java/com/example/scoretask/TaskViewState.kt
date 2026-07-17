@@ -13,5 +13,7 @@ data class TaskUiState(
 
     val errorMessage: String? = null,
 
+    val sessionCount :Int =0
+
 
 )

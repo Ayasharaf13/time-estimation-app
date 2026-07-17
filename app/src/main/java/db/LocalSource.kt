@@ -1,5 +1,11 @@
 package db
 
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import com.example.scoretask.model.SessionStatus
+import com.example.scoretask.model.TaskSessionEntity
 import com.example.scoretask.model.TaskTemplateEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -15,5 +21,17 @@ interface LocalSource {
     suspend fun isTitleExists(title: String): Boolean
 
     suspend fun deleteTaskById(taskId: Long): Int
+
+    suspend fun insertSession(session: TaskSessionEntity): Long
+
+    suspend fun updateSession(session: TaskSessionEntity)
+
+    fun getSessionCountForDay(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: SessionStatus = SessionStatus.IDLE
+    ): Flow<Int>
+
+
 
 }

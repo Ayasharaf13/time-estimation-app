@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.example.scoretask.model.SessionStatus
+import com.example.scoretask.model.TaskSessionEntity
 
 class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
@@ -20,6 +21,8 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
     private val _state = MutableStateFlow(TimerState())
     val state = _state.asStateFlow()
+
+    private var currentSessionId: Long = 0L
 
 
     init {
@@ -32,16 +35,9 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
             //_state.collect {intent->
             when (intent) {
 
-                TimerIntent.StartTimer ->
-
-                    /* _state.update {
-                        it.copy(isTimerRunning = true)
-                    }*/
-                    startTimer()
-
-                TimerIntent.PauseTimer -> pauseTimer()
-
-                TimerIntent.ResetTimer -> resetTimer()
+              is  TimerIntent.StartTimer -> startNewSession(intent.templateId,intent.estimateMs)//startTimer(intent.templateId)
+              is  TimerIntent.PauseTimer -> pauseTimer(intent.templateId)
+              is  TimerIntent.ResetTimer -> resetTimer(intent.templateId)
 
 
                 // لو عندكِ أكشنز تانية بتغطيها هنا...
@@ -53,7 +49,7 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
     private var timerJob: Job? = null
 
-    private fun startTimer() {
+    private fun startTimer(templateId: Long) {
 
         if (_state.value.isRunning) return
 
@@ -96,14 +92,14 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
 
             if (_state.value.currentTime <= 0) {
-                onTimerSuccessfullyFinished()
+                onTimerSuccessfullyFinished(templateId)
             }
         }
 
     }
 
 
-    private fun onTimerSuccessfullyFinished() {
+    private fun onTimerSuccessfullyFinished(templateId: Long) {
         timerJob?.cancel() // تأمين لإيقاف الـ Job
 
         _state.update {
@@ -112,24 +108,90 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
                 currentTime = 0L,
                 value = 0f
             )
+
+
+        }
+
+        viewModelScope.launch {
+            if (currentSessionId != 0L) {
+
+                repo.updateSession(
+                    TaskSessionEntity(
+                        id = currentSessionId,
+                        taskTemplateId = templateId,
+                        status = SessionStatus.FINISHED,
+                      //  actualDurationMs = e, // الوقت الفعلي اللي استغرقه بالملي ثانية
+
+                      //  startedAt = System.currentTimeMillis() - actualDuration,
+                        completedAt = System.currentTimeMillis()
+
+
+                    )
+                )
+
+            }
         }
     }
 
-    private fun pauseTimer() {
+
+      /*  viewModelScope.launch {
+            if (currentSessionId != 0L) {
+                // نحدث الجلسة الحالية لتصبح مكتملة ونحسب المدة الفعلية
+                repo.updateSession(
+                    sessionId = currentSessionId,
+                    actualDurationMs = _state.value.totalTime, // بما أنها اكتملت بالكامل
+                    completedAt = System.currentTimeMillis()
+                )
+                // نصفر الـ ID لكي نقوم بعمل Insert جديد في المرة القادمة
+                currentSessionId = 0L
+            }*/
+   // }
+
+    private fun pauseTimer(templateId: Long) {
         timerJob?.cancel()
 
         _state.update {
             it.copy(status = SessionStatus.PAUSED)
         }
+
+        viewModelScope.launch {
+            if (currentSessionId != 0L) {
+                repo.updateSession(
+                   TaskSessionEntity(
+                       id = currentSessionId,
+                        taskTemplateId = templateId,
+                       status = SessionStatus.PAUSED
+
+
+                )
+                )
+
+            }
+    }
     }
 
 
-        private fun resetTimer() {
+        private fun resetTimer(templateId: Long) {
             timerJob?.cancel()
             _state.value = TimerState()
+
+            viewModelScope.launch {
+                if (currentSessionId != 0L) {
+                    // نحدث الجلسة الحالية لتصبح مكتملة ونحسب المدة الفعلية
+                    repo.updateSession(
+                        TaskSessionEntity(
+                            id = currentSessionId,
+                            taskTemplateId = templateId,
+                            status = SessionStatus.IDLE
+
+                        )
+                    )
+                    // نصفر الـ ID لكي نقوم بعمل Insert جديد في المرة القادمة
+                    currentSessionId = 0L
+                }
+            }
+
         }
-
-
 
 
 /*
@@ -174,11 +236,14 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
                 if (latestTask != null) {
                     val taskDuration = latestTask.defaultEstimateMs
+                    val idTask = latestTask.id
+
 
                     _state.update {
                         it.copy(
                             totalTime = taskDuration,
                             currentTime = taskDuration,
+                            idTask = idTask,
                             value = 1.0f // التايمر يبدأ والدائرة كاملة 100%
                         )
                     }
@@ -200,8 +265,41 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
     }
 
 
+    fun startNewSession(templateId: Long, estimateMs: Long) {
+        if (_state.value.isRunning) return
 
+        // حماية: لو الوقت صفر لا نفعل شيء
+        if (_state.value.currentTime <= 0L) return
 
+        viewModelScope.launch {
+            if (currentSessionId == 0L) {
+                // 1. حالة جلسة جديدة كلياً: نقوم بإنشائها وحفظها في قاعدة البيانات أولاً
+                val newSession = TaskSessionEntity(
+                    taskTemplateId = templateId,
+                    originalEstimateMs = estimateMs,
+                    status = SessionStatus.RUNNING,
+                    actualDurationMs = estimateMs,
+                    startedAt = System.currentTimeMillis()
+                )
+                currentSessionId = repo.insertSession(newSession)
+            } else {
+                // 2. حالة استئناف جلسة موجودة (Resume): نحدث حالتها فقط في قاعدة البيانات
+               //  repo.updateSession(currentSessionId, SessionStatus.RUNNING)
+
+                repo.updateSession(
+                    TaskSessionEntity(
+                        taskTemplateId = templateId,
+                        status = SessionStatus.IDLE
+                    )
+                )
+
+            }
+
+            // 3. بعد إتمام عمليات قاعدة البيانات بأمان، نبدأ التايمر الفعلي في الـ UI
+            startTimer(templateId)
+
+        }
+    }
 
 
 

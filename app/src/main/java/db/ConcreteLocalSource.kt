@@ -2,6 +2,8 @@ package db
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.example.scoretask.model.SessionStatus
+import com.example.scoretask.model.TaskSessionEntity
 import com.example.scoretask.model.TaskTemplateEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -11,6 +13,7 @@ class ConcreteLocalSource : LocalSource {
 
     val context: Context
     var taskTemplateDao: TaskTemplateDao
+    var taskSessionDao: TaskSessionDao
 
 
     companion object {
@@ -31,6 +34,7 @@ class ConcreteLocalSource : LocalSource {
         this.context = con
         val db: AppDatabase = AppDatabase.getInstance(context.applicationContext)
         taskTemplateDao = db.taskTemplateDao()
+        taskSessionDao = db.taskSessionDao()
 
 
     }
@@ -65,6 +69,22 @@ class ConcreteLocalSource : LocalSource {
 
     override suspend fun deleteTaskById(taskId: Long): Int {
       return taskTemplateDao.deleteTaskById(taskId)
+    }
+
+    override suspend fun insertSession(session: TaskSessionEntity): Long {
+        return taskSessionDao.insertSession(session)
+    }
+
+    override suspend fun updateSession(session: TaskSessionEntity) {
+     taskSessionDao.updateSession(session)
+    }
+
+    override fun getSessionCountForDay(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: SessionStatus
+    ): Flow<Int> {
+       return taskSessionDao.getSessionCountForDay(startOfDay,endOfDay,status)
     }
 
 

@@ -9,6 +9,7 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import android.R.attr.centerX
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -17,6 +18,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.annotation.Nullable
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -157,6 +159,10 @@ class MainActivity : ComponentActivity() {
             TaskViewModelFactory(repository)
         }
 
+        val taskOverViewViewModel: TaskOverviewViewModel by viewModels {
+            TaskOverviewViewModelFactory(repository)
+        }
+
        /* val timerViewModel: TimerViewModel by viewModels {
             TimerViewModelFactory(repository)
         }*/
@@ -207,7 +213,7 @@ class MainActivity : ComponentActivity() {
 
                     composable(route = Screen.MainHome.route) {
 
-                        BottomNav( taskViewModel, rootNavController)
+                        BottomNav( taskViewModel, taskOverViewViewModel,rootNavController)
                     }
 
 
@@ -246,8 +252,9 @@ class MainActivity : ComponentActivity() {
 
 
 
+
     @Composable
-    fun BottomNav(taskViewModel: TaskViewModel ,rootNavController: NavController) {
+    fun BottomNav(taskViewModel: TaskViewModel, taskOverViewViewModel: TaskOverviewViewModel, rootNavController: NavController) {
 
         // 1. تعريف الحالة في قمة الدالة (Top of the function)
         val selectedNavigationIndex = rememberSaveable {
@@ -374,6 +381,7 @@ class MainActivity : ComponentActivity() {
 
                    HomeRoute(viewModel = taskViewModel,
                        onNavigateToTimer = {
+
                            // هنا نأمر الموجه الأكبر بفتح شاشة التايمر المسجلة فوق
                            rootNavController.navigate(Screen.TimerTask.route)
                        }
@@ -383,7 +391,9 @@ class MainActivity : ComponentActivity() {
                    // TaskScreenWrapper(viewModel = taskViewModel )
                 }
                 composable(route = Screen.Task.route) {
-                    TaskRoute(taskViewModel)
+
+
+                    TaskRoute(taskViewModel,taskOverViewViewModel)
                    // DailyOverviewScreen(taskViewModel)
 
                 }
@@ -1620,7 +1630,7 @@ fun ScreenHeader() {
 //}*/
 
 @Composable
-fun TodayOverviewCard() {
+fun TodayOverviewCard(state: TaskUiState) {
 
     Column(Modifier.padding(start = 14.dp, end = 14.dp)) {
         Text(
@@ -1682,7 +1692,7 @@ fun TodayOverviewCard() {
 
             Column {
                 Text(
-                    text = "8",
+                    text = state.sessionCount.toString(),
                     fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.sfpro_semibold)),
                     color = Color.White
@@ -1819,21 +1829,26 @@ fun TaskRow(titleTask: String = "",displayTime:String = "") {
 }
 
 
+
 @Composable
 fun TaskRoute(
-    viewModel: TaskViewModel = viewModel()
+    viewModel: TaskViewModel /*TaskOverviewViewModel */= viewModel(),
+            viewModelOverView: TaskOverviewViewModel = viewModel()
+
 ) {
 
     val state by viewModel.uiState.collectAsState()
+    val stateOverView by viewModelOverView.state.collectAsState()
 
 
-    DailyOverviewScreen (state)
+
+    DailyOverviewScreen (state,stateOverView)
 
 }
 
 
 @Composable
-fun ScoreTaskTimer(   state: TimerState,
+fun ScoreTaskTimer( state: TimerState,
                       onIntent: (TimerIntent) -> Unit,
                       // الدالة المسؤولة عن النقل
                       /* initialValue: Float = 0.1f,  totalTime: Long =60000L*/) {
@@ -1990,9 +2005,9 @@ fun ScoreTaskTimer(   state: TimerState,
             IconButton(
                 onClick = {
                     if (state.isRunning) {
-                        onIntent(TimerIntent.PauseTimer)
+                        onIntent(TimerIntent.PauseTimer(state.idTask))
                     }else{
-                        onIntent(TimerIntent.StartTimer)
+                        onIntent(TimerIntent.StartTimer(state.idTask,state.totalTime))
 
                     }
                 },
@@ -2020,7 +2035,7 @@ fun ScoreTaskTimer(   state: TimerState,
 
             IconButton(
                 onClick = {
-                    onIntent(TimerIntent.ResetTimer)
+                    onIntent(TimerIntent.ResetTimer(state.idTask))
                 },
                 modifier = Modifier.size(41.dp)
             ) {
@@ -2053,7 +2068,7 @@ fun ScoreTaskTimer(   state: TimerState,
 
 
 @Composable
-fun DailyOverviewScreen(  state: TaskUiState) {
+fun DailyOverviewScreen( state: TaskUiState,stateOverView: TaskUiState) {
     BgScreen()
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -2095,7 +2110,7 @@ fun DailyOverviewScreen(  state: TaskUiState) {
 
             ) {
 
-            TodayOverviewCard()
+            TodayOverviewCard(stateOverView)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -3138,9 +3153,11 @@ fun EnterExpectTime(
 fun ScoreRoute(
     viewModel: TimerViewModel,
     navController: NavController
+
 ) {
    // val state by viewModel.state.collectAsState()
     val state by viewModel.state.collectAsStateWithLifecycle()
+
     val expectedTime = state.totalTimeInMinutes // 👈 غيري الاسم حسب المتغير عندك في الـ state
     // 2. نمرره في الـ Route بالشكل ده:
 
@@ -3156,6 +3173,7 @@ fun ScoreRoute(
         }
     }
     ScoreTaskTimer (
+
         state = state,
         onIntent = viewModel::onIntent
     )
@@ -3170,6 +3188,7 @@ fun HomeRoute(
     viewModel: TaskViewModel
 ) {
     val state by viewModel.state.collectAsState()
+
 
     HomeScreen(
         onNavigateToTimer = onNavigateToTimer,

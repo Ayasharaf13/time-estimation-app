@@ -32,8 +32,14 @@ class TaskViewModel (
 
     init {
 
-
         getAllTasks()
+
+
+       // deleteTaskById(36)
+       // deleteTaskById(37)
+
+
+
     }
 
     fun onIntent(intent: TaskIntent) {
@@ -41,6 +47,7 @@ class TaskViewModel (
         viewModelScope.launch (){
        //_state.collect {intent->
             when (intent) {
+
                 is TaskIntent.TitleChanged -> {
 
                   _state.update {
@@ -177,7 +184,7 @@ class TaskViewModel (
         viewModelScope.launch {
             try {
                 // نطلب من الـ Room تمسح التاسك بالـ ID بتاعها
-                repository.getTaskById(id)
+                repository.deleteTaskById(id)//getTaskById(id)
 
 
                 // تريكة الـ copy(): اللستة هتتحدث أوتوماتيكياً لو شغالين بـ Flow من الـ Room،

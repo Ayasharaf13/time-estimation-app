@@ -1,5 +1,7 @@
 package com.example.scoretask
 
+import com.example.scoretask.model.SessionStatus
+import com.example.scoretask.model.TaskSessionEntity
 import com.example.scoretask.model.TaskTemplateEntity
 import db.LocalSource
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +53,22 @@ class TaskRepositoryImpl private constructor(
 
     override suspend fun deleteTaskById(taskId: Long): Int {
         return localSource.deleteTaskById(taskId)
+    }
+
+    override suspend fun insertSession(session: TaskSessionEntity): Long {
+       return localSource.insertSession(session)
+    }
+
+    override suspend fun updateSession(session: TaskSessionEntity) {
+        localSource.updateSession(session)
+    }
+
+    override fun getSessionCountForDay(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: SessionStatus
+    ): Flow<Int> {
+        return localSource.getSessionCountForDay(startOfDay,endOfDay,status)
     }
 
 

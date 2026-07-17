@@ -30,11 +30,11 @@ data class TaskSessionEntity(
     val id: Long = 0L,
 
     @ColumnInfo(name = "task_template_id")
-    val taskTemplateId: Long,
+    val taskTemplateId: Long,//
 
     // User estimation
     @ColumnInfo(name = "original_estimate_ms")
-    val originalEstimateMs: Long,
+    val originalEstimateMs: Long = 0L,//
 
     // Extension requested by the user
     @ColumnInfo(name = "added_extension_ms")
@@ -46,13 +46,13 @@ data class TaskSessionEntity(
 
     // Timer information
     @ColumnInfo(name = "started_at")
-    val startedAt: Long? = null,
+    val startedAt: Long? = null,//
 
     @ColumnInfo(name = "completed_at")
     val completedAt: Long? = null,
 
     @ColumnInfo(name = "status")
-    val status: SessionStatus = SessionStatus.IDLE,
+    val status: SessionStatus = SessionStatus.IDLE,//
 
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),

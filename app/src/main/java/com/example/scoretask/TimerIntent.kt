@@ -1,15 +1,18 @@
 package com.example.scoretask
 
-interface TimerIntent {
+sealed interface TimerIntent {
 
 
-        object StartTimer : TimerIntent
+      //  object StartTimer : TimerIntent
 
+        data class StartTimer(val templateId: Long,val estimateMs: Long) : TimerIntent
+       // object PauseTimer : TimerIntent
 
-        object PauseTimer : TimerIntent
+        data class PauseTimer(val templateId: Long) : TimerIntent
 
+        data class ResetTimer  (val templateId: Long) : TimerIntent
 
-        object ResetTimer : TimerIntent
+       // object ResetTimer : TimerIntent
 
 
 }
