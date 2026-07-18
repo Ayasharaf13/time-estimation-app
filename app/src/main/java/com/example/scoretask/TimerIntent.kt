@@ -15,4 +15,9 @@ sealed interface TimerIntent {
        // object ResetTimer : TimerIntent
 
 
+        object EndSessionClicked : TimerIntent
+        object DismissDialog : TimerIntent
+        object ConfirmFinishEarly : TimerIntent
+        object ConfirmGiveUp : TimerIntent
+
 }

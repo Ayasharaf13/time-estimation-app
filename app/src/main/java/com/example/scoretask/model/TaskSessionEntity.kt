@@ -65,5 +65,7 @@ enum class SessionStatus {
     IDLE,      // التايمر واقف أو لسه معمول له Reset
     RUNNING,   // التايمر شغال وبيعد تنازلي
     PAUSED,    // التايمر موقوف مؤقتاً
-    FINISHED   // التايمر انتهى طبيعياً ووصل لـ 00:00
+    FINISHED,   // التايمر انتهى طبيعياً ووصل لـ 00:00
+
+    CANCELED
 }

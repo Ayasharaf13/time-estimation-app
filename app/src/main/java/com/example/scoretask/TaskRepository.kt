@@ -28,4 +28,31 @@ interface TaskRepository {
         endOfDay: Long,
         status: SessionStatus = SessionStatus.IDLE
     ): Flow<Int>
+
+    suspend fun completeSession(
+        sessionId: Long,
+        status: SessionStatus,
+        completedAt: Long,
+        actualDuration: Long
+
+    )
+
+    fun getTotalFocusTimeForDay(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: List<SessionStatus>
+    ): Flow<Long>
+
+
+    suspend fun updateSessionState(
+        sessionId: Long,
+        status: SessionStatus,
+        completedAt: Long
+    )
+
+    fun getDailyEstimationAccuracy(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: SessionStatus = SessionStatus.FINISHED
+    ): Flow<Double>
 }

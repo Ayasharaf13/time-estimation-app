@@ -13,6 +13,7 @@ import androidx.room.PrimaryKey
         Index(value = ["is_archived"])
     ]
 )
+
 data class TaskTemplateEntity(
 
     @PrimaryKey(autoGenerate = true)

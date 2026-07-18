@@ -13,7 +13,12 @@ data class TaskUiState(
 
     val errorMessage: String? = null,
 
-    val sessionCount :Int =0
+    val sessionCount :Int =0,
+
+    val totalMinutesToday: Long = 0,
+    val totalSecondsToday: Long = 0,
+
+    val totalDailyEstimationAccuracy: Double = 0.0
 
 
 )

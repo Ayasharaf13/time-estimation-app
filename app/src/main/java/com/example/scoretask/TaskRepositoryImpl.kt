@@ -71,5 +71,39 @@ class TaskRepositoryImpl private constructor(
         return localSource.getSessionCountForDay(startOfDay,endOfDay,status)
     }
 
+    override suspend fun completeSession(
+        sessionId: Long,
+        status: SessionStatus,
+        completedAt: Long,
+        actualDuration: Long
+
+    ) {
+        localSource.completeSession(sessionId,status,completedAt,actualDuration)
+    }
+
+    override fun getTotalFocusTimeForDay(
+        startOfDay: Long,
+        endOfDay: Long,
+        status:List<SessionStatus>
+    ): Flow<Long> {
+      return localSource.getTotalFocusTimeForDay(startOfDay,endOfDay,status)
+    }
+
+    override suspend fun updateSessionState(
+        sessionId: Long,
+        status: SessionStatus,
+        completedAt: Long
+    ) {
+        localSource.updateSessionState(sessionId,status,completedAt)
+    }
+
+    override fun getDailyEstimationAccuracy(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: SessionStatus
+    ): Flow<Double> {
+        return localSource.getDailyEstimationAccuracy(startOfDay,endOfDay,status)
+    }
+
 
 }

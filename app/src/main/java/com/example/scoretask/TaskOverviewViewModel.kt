@@ -24,6 +24,9 @@ class TaskOverviewViewModel(private val repository: TaskRepository): ViewModel()
 
     init {
         getSessionCountForDay()
+        getTotalFocusTimeForDay()
+        getDailyEstimationAccuracy()
+
     }
 
 
@@ -43,5 +46,52 @@ class TaskOverviewViewModel(private val repository: TaskRepository): ViewModel()
     }
 
 
+    fun getTotalFocusTimeForDay(){
+
+        viewModelScope.launch  (){
+
+            repository.getTotalFocusTimeForDay(
+                startOfDay = DateTimeUtils.getStartOfDayMillis(),
+                endOfDay = DateTimeUtils.getEndOfDayMillis(),
+                status= listOf(SessionStatus.FINISHED, SessionStatus.CANCELED)
+            ).collect { totalMs ->
+                val totalSeconds = totalMs / 1000
+                val minutes = totalSeconds / 60
+                val remainingSeconds = totalSeconds % 60 // الثواني المتبقية بعد حساب الدقائق
+                _state.update { currentState->
+                    currentState.copy(
+                        totalMinutesToday = minutes,
+                        totalSecondsToday = remainingSeconds
+                    )
+
+
+                }
+            }
+        }
+    }
+
+    fun getDailyEstimationAccuracy(
+
+    ) {
+        viewModelScope.launch()
+        {
+
+            repository.getDailyEstimationAccuracy(
+                startOfDay = DateTimeUtils.getStartOfDayMillis(),
+                endOfDay = DateTimeUtils.getEndOfDayMillis(),
+                status = SessionStatus.FINISHED
+            ).collect { dailyEstimationAccuracy ->
+                _state.update { currentState ->
+                    currentState.copy(
+                        totalDailyEstimationAccuracy = dailyEstimationAccuracy
+                    )
+
+                }
+
+
+            }
+
+        }
+    }
 
 }

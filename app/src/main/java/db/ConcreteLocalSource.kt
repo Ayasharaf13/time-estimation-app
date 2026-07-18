@@ -87,5 +87,40 @@ class ConcreteLocalSource : LocalSource {
        return taskSessionDao.getSessionCountForDay(startOfDay,endOfDay,status)
     }
 
+    override suspend fun completeSession(
+        sessionId: Long,
+        status: SessionStatus,
+        completedAt: Long,
+        actualDuration: Long
+    ) {
+        taskSessionDao.completeSession(sessionId,status,completedAt,actualDuration)
+    }
+
+
+
+    override fun getTotalFocusTimeForDay(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: List<SessionStatus>
+    ): Flow<Long> {
+       return  taskSessionDao.getTotalFocusTimeForDay(startOfDay,endOfDay,status)
+    }
+
+    override suspend fun updateSessionState(
+        sessionId: Long,
+        status: SessionStatus,
+        completedAt: Long
+    ) {
+        taskSessionDao.updateSessionState(sessionId,status,completedAt)
+    }
+
+    override fun getDailyEstimationAccuracy(
+        startOfDay: Long,
+        endOfDay: Long,
+        status: SessionStatus
+    ): Flow<Double> {
+        return  taskSessionDao. getDailyEstimationAccuracy(startOfDay,endOfDay,status)
+    }
+
 
 }

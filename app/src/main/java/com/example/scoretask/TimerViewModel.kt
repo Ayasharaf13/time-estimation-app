@@ -38,6 +38,22 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
               is  TimerIntent.StartTimer -> startNewSession(intent.templateId,intent.estimateMs)//startTimer(intent.templateId)
               is  TimerIntent.PauseTimer -> pauseTimer(intent.templateId)
               is  TimerIntent.ResetTimer -> resetTimer(intent.templateId)
+                TimerIntent.EndSessionClicked -> {
+                    // نفتح الـ Dialog فوراً عبر الـ State
+                    _state.update { it.copy(showEndSessionDialog = true) }
+                }
+                TimerIntent.DismissDialog -> {
+                    // نغلق الـ Dialog
+                    _state.update { it.copy(showEndSessionDialog = false) }
+                }
+                TimerIntent.ConfirmFinishEarly -> {
+                    _state.update { it.copy(showEndSessionDialog = false) }
+                finishSession (SessionStatus.FINISHED) // 🟢 تحديث بنجاح
+                }
+                TimerIntent.ConfirmGiveUp -> {
+                    _state.update { it.copy(showEndSessionDialog = false) }
+                    finishSession(SessionStatus.CANCELED)  // 🔴 تحديث كـ استسلام
+                }
 
 
                 // لو عندكِ أكشنز تانية بتغطيها هنا...
@@ -92,16 +108,16 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
 
             if (_state.value.currentTime <= 0) {
-                onTimerSuccessfullyFinished(templateId)
+                finishSession(SessionStatus.FINISHED)
             }
         }
 
     }
 
 
-    private fun onTimerSuccessfullyFinished(templateId: Long) {
+    private fun finishSession(status: SessionStatus) {
         timerJob?.cancel() // تأمين لإيقاف الـ Job
-
+        val actualFocusedTime = _state.value.totalTime - _state.value.currentTime
         _state.update {
             it.copy(
                 status = SessionStatus.FINISHED,
@@ -112,22 +128,12 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
         }
 
+
         viewModelScope.launch {
             if (currentSessionId != 0L) {
 
-                repo.updateSession(
-                    TaskSessionEntity(
-                        id = currentSessionId,
-                        taskTemplateId = templateId,
-                        status = SessionStatus.FINISHED,
-                      //  actualDurationMs = e, // الوقت الفعلي اللي استغرقه بالملي ثانية
+                repo.completeSession(currentSessionId, status, System.currentTimeMillis(),actualFocusedTime)
 
-                      //  startedAt = System.currentTimeMillis() - actualDuration,
-                        completedAt = System.currentTimeMillis()
-
-
-                    )
-                )
 
             }
         }
@@ -156,15 +162,9 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
 
         viewModelScope.launch {
             if (currentSessionId != 0L) {
-                repo.updateSession(
-                   TaskSessionEntity(
-                       id = currentSessionId,
-                        taskTemplateId = templateId,
-                       status = SessionStatus.PAUSED
+                repo.updateSessionState(currentSessionId, SessionStatus.PAUSED, System.currentTimeMillis())
 
 
-                )
-                )
 
             }
     }
@@ -178,14 +178,15 @@ class TimerViewModel( val repo: TaskRepository) : ViewModel () {
             viewModelScope.launch {
                 if (currentSessionId != 0L) {
                     // نحدث الجلسة الحالية لتصبح مكتملة ونحسب المدة الفعلية
-                    repo.updateSession(
+                    repo.updateSessionState(currentSessionId, SessionStatus.IDLE, System.currentTimeMillis())
+                   /* repo.updateSession(
                         TaskSessionEntity(
                             id = currentSessionId,
                             taskTemplateId = templateId,
                             status = SessionStatus.IDLE
 
                         )
-                    )
+                    )*/
                     // نصفر الـ ID لكي نقوم بعمل Insert جديد في المرة القادمة
                     currentSessionId = 0L
                 }

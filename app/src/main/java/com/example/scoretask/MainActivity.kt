@@ -51,6 +51,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -142,6 +143,8 @@ import kotlin.collections.minusAssign
 import kotlin.compareTo
 import kotlin.div
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults.colors
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.draw.shadow
 import kotlin.text.toFloat
 
@@ -776,7 +779,8 @@ fun CustomTabRow() {
 
 @Composable
 fun TimeMuscleProgressIndicator(
-    progress: Float, // القيمة من 0.0 إلى 1.0
+    state: TaskUiState ,
+     // progress:Float,                         //Float, // القيمة من 0.0 إلى 1.0
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -814,16 +818,27 @@ fun TimeMuscleProgressIndicator(
             drawArc(
                 brush = sweepGradient,
                 startAngle = -90f, // البدء من الأعلى (الساعة 12)
-                sweepAngle = 360f * progress,
+                sweepAngle = 360f * (state.totalDailyEstimationAccuracy.toFloat() / 100f) ,//progress,
                 useCenter = false,
                 style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round),
 
                 )
         }
 
+        val accuracy = state.totalDailyEstimationAccuracy // القيمة القادمة من الـ ViewModel (مثلاً 90.62)
+
+// كود التنسيق النظيف
+        val formattedAccuracy = if (accuracy % 1 == 0.0) {
+            "${accuracy.toInt()}%"
+        } else {
+            "${String.format("%.1f", accuracy)}%" // 👈 ستظهر: 90.6% (علامة عشرية واحدة)
+        }
+
+
+
         Text(
-            text = "92%",
-            style = TextStyle(
+            text = formattedAccuracy,
+                style = TextStyle(
                 fontWeight = Black,
                 lineHeight = 11.sp,
                 letterSpacing = 1.sp,// FontWeight(860),
@@ -1744,9 +1759,10 @@ fun TodayOverviewCard(state: TaskUiState) {
                 }
             }
 
+
             Column {
                 Text(
-                    text = "2h 84m",
+                    text = "${state.totalMinutesToday}m ${state.totalSecondsToday}s",//"2h 84m",
                     fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.sfpro_semibold)),
                     color = Color.White
@@ -1848,36 +1864,52 @@ fun TaskRoute(
 
 
 @Composable
+fun EndSessionDialog(
+    onDismiss: () -> Unit,
+    onConfirmFinish: () -> Unit,
+    onConfirmGiveUp: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Are you done with your task?",
+                fontSize = 18.sp,
+                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+                color = Color.White
+            )
+        },
+        containerColor = Color(0xFF200C4E), // متناسق مع ثيم تطبيقك الداكن
+        confirmButton = {
+
+            TextButton(onClick = onConfirmFinish) {
+                Text(
+                    text = "🟢 Yes, I finished it!",
+                    color = Color(0xFF4CAF50), // أخضر مريح
+                    fontFamily = FontFamily(Font(R.font.sfpro_semibold))
+                )
+            }
+        },
+        dismissButton = {
+
+            TextButton(onClick = onConfirmGiveUp) {
+                Text(
+                    text = "🔴 No, I'm giving up",
+                    color = Color(0xFFFF5252), // أحمر ناعم ومريح
+                    fontFamily = FontFamily(Font(R.font.sfpro_semibold))
+                )
+            }
+        }
+    )
+}
+
+
+@Composable
 fun ScoreTaskTimer( state: TimerState,
                       onIntent: (TimerIntent) -> Unit,
-                      // الدالة المسؤولة عن النقل
-                      /* initialValue: Float = 0.1f,  totalTime: Long =60000L*/) {
+                   ) {
 
 
-  /*  var value by remember {
-        mutableStateOf(initialValue)
-    }
-
-    // create variable for current time
-    var currentTime by remember {
-        mutableStateOf(totalTime)
-    }
-    // create variable for isTimerRunning
-    var isTimerRunning by remember {
-        mutableStateOf(true)
-    }*/
-
-
-   /* LaunchedEffect(key1 = currentTime, key2 = isTimerRunning) {
-        if(currentTime > 0 && isTimerRunning) {
-            delay(100L)
-            currentTime -= 100L
-            value = currentTime / totalTime.toFloat()
-        }
-    }*/
-
-
-    /////////////////
     Box(modifier = Modifier.fillMaxSize().background(basePurple)) {}
     Box(
         modifier = Modifier
@@ -1974,15 +2006,7 @@ fun ScoreTaskTimer( state: TimerState,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
             }
-// 1. حساب الدقائق المتبقية
-           // val minutes = (currentTime / 1000L) / 60
 
-// 2. حساب الثواني المتبقية (باقي القسمة على 60 لتبدأ من 59 وتنازلياً)
-          //  val seconds = (currentTime / 1000L) % 60
-
-// 3. تنسيق النص ليظهر دائماً بخانتين (مثلاً الـ 5 ثواني تظهر 05 وليس 5)
-          //  val formattedTime = String.format("%02d:%02d", minutes, seconds)
-            // 3. نص الوقت في المنتصف
             Text(
                 text = state.formattedTime,//(currentTime / 1000L).toString(), //"45:00",
                 style = TextStyle(
@@ -1998,7 +2022,8 @@ fun ScoreTaskTimer( state: TimerState,
 
         Spacer(modifier = Modifier.height(80.dp))
         Row(
-            Modifier.fillMaxSize(),
+
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
 
@@ -2024,12 +2049,7 @@ fun ScoreTaskTimer( state: TimerState,
                 )
             }
 
-           /* Icon (
-                painter = painterResource(id = R.drawable.icon_play), // اسم الملف الذي أنشأتِه
-                contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.size(41.dp)//.padding(top = 2.dp, start = 2.dp) // حجم ثابت كما اتفقنا
-            )*/
+
             Spacer(modifier = Modifier.width(80.dp))
 
 
@@ -2047,15 +2067,48 @@ fun ScoreTaskTimer( state: TimerState,
                 )
             }
 
-         /*   Icon (
-
-                painter = painterResource(id = R.drawable.retry_icon), // اسم الملف الذي أنشأتِه
-                contentDescription = null,
-                modifier = Modifier.size(41.dp)//.padding(top = 2.dp, start = 2.dp) // حجم ثابت كما اتفقنا
-            )*/
 
         }
+        Spacer(Modifier.height(70.dp))
+
+        OutlinedButton(
+            onClick = {
+                onIntent(TimerIntent.EndSessionClicked)
+
+            },
+            border = BorderStroke(1.dp, Color(0xFFFF2521).copy(alpha = 0.7f)), // إطار أحمر خفيف
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF2521)) // نص أحمر
+        ) {
+            Text(text = "End Session", color = Color.White)
     }
+
+        if (state.showEndSessionDialog) {
+            EndSessionDialog(
+                onDismiss = { onIntent(TimerIntent.DismissDialog) },
+                onConfirmFinish = { onIntent(TimerIntent.ConfirmFinishEarly) },
+                onConfirmGiveUp = { onIntent(TimerIntent.ConfirmGiveUp) }
+            )
+        }
+        /*Button(
+            onClick = {
+                // هنا نرسل الـ Intent لفتح الـ Dialog أو معالجة الإنهاء المبكر
+                //onIntent(TimerIntent.EndSessionClicked(state.idTask))
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFE53935) // لون أحمر هادئ يعبر عن الإنهاء والتوقف
+            ),
+            shape = RoundedCornerShape(40.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = "End Session",
+                color = Color.White,
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.sfpro_semibold))
+            )
+        }*/
+    }
+
 
 }
 
@@ -2118,7 +2171,7 @@ fun DailyOverviewScreen( state: TaskUiState,stateOverView: TaskUiState) {
                 horizontalArrangement = Arrangement.End // لتوسيط العناصر أفقياً
             ) //) {
             {
-                TimeMuscleProgressIndicator(0.90f)
+                TimeMuscleProgressIndicator(stateOverView)
 
             }
 
