@@ -122,5 +122,14 @@ class ConcreteLocalSource : LocalSource {
         return  taskSessionDao. getDailyEstimationAccuracy(startOfDay,endOfDay,status)
     }
 
+    override fun getTotalFocusTimeAllTime(status: List<SessionStatus>): Flow<Long> {
+        return taskSessionDao.getTotalFocusTimeAllTime(status)
+    }
+
+    override fun getAllTimeSessionCount(status: SessionStatus): Flow<Long> {
+
+        return taskSessionDao.getAllTimeSessionCount(status)
+    }
+
 
 }

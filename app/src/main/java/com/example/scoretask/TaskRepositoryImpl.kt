@@ -106,4 +106,16 @@ class TaskRepositoryImpl private constructor(
     }
 
 
+
+    override fun getTotalFocusTimeAllTime(status: List<SessionStatus>): Flow<Long> {
+
+        return localSource.getTotalFocusTimeAllTime(status)
+    }
+
+    override fun getAllTimeSessionCount(status: SessionStatus): Flow<Long> {
+
+        return localSource.getAllTimeSessionCount(status)
+    }
+
+
 }

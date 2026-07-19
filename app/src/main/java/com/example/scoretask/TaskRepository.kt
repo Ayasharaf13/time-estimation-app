@@ -55,4 +55,16 @@ interface TaskRepository {
         endOfDay: Long,
         status: SessionStatus = SessionStatus.FINISHED
     ): Flow<Double>
+
+
+    fun getTotalFocusTimeAllTime(
+        status: List<SessionStatus>
+    ): Flow<Long>
+
+
+    fun getAllTimeSessionCount(
+        status: SessionStatus = SessionStatus.FINISHED
+    ): Flow<Long>
+
+
 }

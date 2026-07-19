@@ -158,13 +158,13 @@ class MainActivity : ComponentActivity() {
         val repository = TaskRepositoryImpl.getInstance(localSource)
 
         // 🛠️ 2. إنشاء الـ ViewModel بـ السطر المعتمد من جوجل باستخدام الـ Factory
-        val taskViewModel: TaskViewModel by viewModels {
+     /*   val taskViewModel: TaskViewModel by viewModels {
             TaskViewModelFactory(repository)
         }
 
         val taskOverViewViewModel: TaskOverviewViewModel by viewModels {
             TaskOverviewViewModelFactory(repository)
-        }
+        }*/
 
        /* val timerViewModel: TimerViewModel by viewModels {
             TimerViewModelFactory(repository)
@@ -180,7 +180,7 @@ class MainActivity : ComponentActivity() {
 
                 // 1. تعريف الـ NavController الرئيسي للتطبيق كله
                 val rootNavController = rememberNavController()
-                // TaskScreenWrapper(taskViewModel)
+
 
                 // 2. الـ NavHost الرئيسي (المسرح الأكبر للتطبيق)
                 NavHost(
@@ -216,7 +216,7 @@ class MainActivity : ComponentActivity() {
 
                     composable(route = Screen.MainHome.route) {
 
-                        BottomNav( taskViewModel, taskOverViewViewModel,rootNavController)
+                        BottomNav( rootNavController,repository)
                     }
 
 
@@ -257,7 +257,19 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun BottomNav(taskViewModel: TaskViewModel, taskOverViewViewModel: TaskOverviewViewModel, rootNavController: NavController) {
+    fun BottomNav(rootNavController: NavController,repository: TaskRepository) {
+        val sharedTaskViewModel: TaskViewModel = viewModel(
+            factory = TaskViewModelFactory(repository)
+        )
+
+        val sharedTaskOverViewViewModel: TaskOverviewViewModel = viewModel(
+            factory = TaskOverviewViewModelFactory(repository)
+        )
+
+
+        val StateViewModel: StatsViewModel = viewModel(
+            factory = StatsViewModelFactory(repository)
+        )
 
         // 1. تعريف الحالة في قمة الدالة (Top of the function)
         val selectedNavigationIndex = rememberSaveable {
@@ -382,7 +394,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                 composable(route = Screen.MainHome.route) {
 
-                   HomeRoute(viewModel = taskViewModel,
+
+                   HomeRoute(viewModel = sharedTaskViewModel,
                        onNavigateToTimer = {
 
                            // هنا نأمر الموجه الأكبر بفتح شاشة التايمر المسجلة فوق
@@ -396,18 +409,17 @@ class MainActivity : ComponentActivity() {
                 composable(route = Screen.Task.route) {
 
 
-                    TaskRoute(taskViewModel,taskOverViewViewModel)
+                    TaskRoute(sharedTaskViewModel,sharedTaskOverViewViewModel)
                    // DailyOverviewScreen(taskViewModel)
 
                 }
                 composable(
                     route = Screen.Stats.route
                 ) {
-                    DashboardScreen()
+                    DashboardScreenRoute(StateViewModel)
+                   // DashboardScreen()
                    // ScoreTaskTimer()
                 }
-
-
 
 
 
@@ -2382,8 +2394,27 @@ fun StateCart(
     }
 }
 
+
+
 @Composable
-fun DashboardScreen() {
+fun DashboardScreenRoute(viewModel: StatsViewModel){
+
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+
+    DashboardScreen(
+        state = state
+    )
+
+
+}
+
+@Composable
+fun DashboardScreen(
+    state: StatsState,
+
+) {
+
     BgScreen()
 
     Column(
@@ -2411,7 +2442,7 @@ fun DashboardScreen() {
 
             Box(modifier = Modifier.weight(1f)) {
                 StateCart(
-                    value = "12",
+                    value ="${state.totalSessionCount}", //"12",
                     title = "Total Tasks Completed",
                     iconInside = R.drawable.icon_inside_circle_left,
                     cardGradient = cardGradient,
@@ -2421,7 +2452,8 @@ fun DashboardScreen() {
 
             Box(modifier = Modifier.weight(1f)) {
                 StateCart(
-                    "5h 49m",
+                    "${state.totalFocusTimeMinutes}m ${state.totalFocusTimeSeconds}s",
+                    //"5h 49m",
                     "Total Foucs Time",
                     R.drawable.icon_inside_right,
                     cardGradient = cardGradient,
@@ -3208,7 +3240,7 @@ fun ScoreRoute(
     navController: NavController
 
 ) {
-   // val state by viewModel.state.collectAsState()
+
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     val expectedTime = state.totalTimeInMinutes // 👈 غيري الاسم حسب المتغير عندك في الـ state

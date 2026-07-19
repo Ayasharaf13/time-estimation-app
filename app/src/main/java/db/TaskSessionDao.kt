@@ -26,7 +26,7 @@ interface TaskSessionDao {
         AND created_at >= :startOfDay 
         AND created_at <= :endOfDay
     """)
-   // @Query("SELECT COUNT(*) FROM task_sessions WHERE completed_at BETWEEN :startOfDay AND :endOfDay")
+
     fun getSessionCountForDay(
         startOfDay: Long,
         endOfDay: Long,
@@ -98,4 +98,25 @@ interface TaskSessionDao {
         endOfDay: Long,
         status: SessionStatus = SessionStatus.FINISHED
     ): Flow<Double>
+
+
+    @Query("""
+    SELECT COALESCE(SUM(actual_duration_ms), 0) 
+    FROM task_sessions
+    WHERE status IN (:status)
+""")
+    fun getTotalFocusTimeAllTime(
+        status: List<SessionStatus>
+    ): Flow<Long>
+
+
+    @Query("""
+    SELECT COUNT(*) FROM task_sessions
+    WHERE status = :status
+""")
+    fun getAllTimeSessionCount(
+        status: SessionStatus = SessionStatus.FINISHED
+    ): Flow<Long>
 }
+
+
