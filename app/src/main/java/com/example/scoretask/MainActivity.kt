@@ -7,18 +7,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
-import android.R.attr.centerX
 import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
-import androidx.annotation.Nullable
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -56,7 +51,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedCard
@@ -139,14 +133,11 @@ import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import db.ConcreteLocalSource
 import kotlinx.coroutines.delay
-import kotlin.collections.minusAssign
-import kotlin.compareTo
-import kotlin.div
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults.colors
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.key
 import androidx.compose.ui.draw.shadow
-import kotlin.text.toFloat
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+
 
 class MainActivity : ComponentActivity() {
 
@@ -595,26 +586,68 @@ val colorSplash3 = Color(0xFF8350DB)
 val color3 = Color(0xFF6943AC)
 
 
-@SuppressLint("RestrictedApi", "RememberReturnType")
+
+@SuppressLint("RestrictedApi")
 @Composable
-fun SimpleVicoChart() {
-
-
+fun SimpleVicoChart(
+    points: List<Number>,
+    selectedTab: Int
+) {
     val pointsGradient = Brush.verticalGradient(
-        0.149f to Color(0xFFA47FFB), // اللون الفاتح عند نسبة 14.9%
-        1.0f to Color(0xFF614B95)    // اللون الغامق عند النهاية
+        0.149f to Color(0xFFA47FFB),
+        1.0f to Color(0xFF614B95)
     )
-    // 1. Initialize the model producer (usually in a ViewModel)
-    val modelProducer = remember { CartesianChartModelProducer() }
-    val daysOfWeek = listOf("Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri")
 
-// 2. Load data into the producer
-    LaunchedEffect(Unit) {
-        modelProducer.runTransaction {
-            lineSeries { series(4, 16, 8, 10, 7, 11, 3) }
+
+
+    val modelProducer = remember(selectedTab) { CartesianChartModelProducer() }
+
+    // 1️⃣ تجهيز التسميات للـ Tab الحالي
+    val axisLabels = remember(selectedTab) {
+        when (selectedTab) {
+           0 -> listOf("Morning", "Afternoon", "Evening", "Night")
+            1 -> listOf("Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri")
+            2 -> listOf("W1", "W2", "W3", "W4")
+            else -> listOf("Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri")
         }
     }
 
+
+
+    val safePoints = remember(points, axisLabels) {
+        if (points.isNotEmpty() && points.size == axisLabels.size) {
+            points
+        } else {
+            List(axisLabels.size) { 0 }
+        }
+    }
+
+    val isAllZeros = remember(safePoints) {
+        safePoints.all { it.toDouble() == 0.0 }
+    }
+
+    // 🎯 🎯 [تعديل 2]: تحديد الشفافية والألوان بناءً على حالة البيانات
+    val lineColor = if (isAllZeros) Color(0xFFAD8AFF).copy(alpha = 0.25f) else Color(0xFFAD8AFF)
+   // val markerColor = if (isAllZeros) Color(0xFFA47FFB).copy(alpha = 0.25f) else Color(0xFFA47FFB)
+    val markerStroke = if (isAllZeros) Color(0xFFAD8AFF).copy(alpha = 0.4f) else Color(0xFFAD8AFF)
+
+    val pointGradient = Brush.verticalGradient(
+        0.149f to (if (isAllZeros) Color(0xFFA47FFB).copy(alpha = 0.2f) else Color(0xFFA47FFB)),
+        1.0f to (if (isAllZeros) Color(0xFF614B95).copy(alpha = 0.2f) else Color(0xFF614B95))
+    )
+    // إرسال النقاط الجديدة فقط بدون extras
+    LaunchedEffect(safePoints,selectedTab) {
+        modelProducer.runTransaction {
+
+            lineSeries {
+                val xValues = safePoints.indices.toList()
+                series(x = xValues, y = safePoints)
+            }
+             /*lineSeries {
+                 series(points)
+             }*/
+        }
+    }
 
     val borderBrush = Brush.linearGradient(
         0.0f to Color(255, 255, 255).copy(alpha = 0.0476f),
@@ -622,128 +655,106 @@ fun SimpleVicoChart() {
     )
 
     val customLineAsBox = rememberLineComponent(
-        fill = Fill(Color.Transparent), // القلب شفاف تماماً
-        thickness = 10.dp,        // الارتفاع الكلي للمستطيل كما في تصميمك (height: 10)
-        strokeThickness = 1.dp,      // سمك الإطار (border-width: 1px)
-        strokeFill = Fill(borderBrush), // التدرج اللوني على الحدود فقط
-
+        fill = Fill(Color.Transparent),
+        thickness = 10.dp,
+        strokeThickness = 1.dp,
+        strokeFill = Fill(borderBrush)
     )
+
     val axisLabelComponent = rememberTextComponent(
         style = TextStyle(
-           
             color = Color(0xFFA6A6A6),
             fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-
-
             fontWeight = FontWeight.W700,
             fontSize = 8.sp,
             lineHeight = 12.sp,
             letterSpacing = 0.sp,
             textAlign = TextAlign.Center
         )
-
     )
+
     val dataMarkerComponent = rememberShapeComponent(
-        // لون النقطة (أبيض من الداخل) مع تحويله لـ Int
-        // fill = Fill(Color.White),
         fill = Fill(pointsGradient),
-        // شكل النقطة (دائرة) - يحتاج لـ core
         shape = CircleShape,
-        // إطار بلون الخط البنفسجي
+        strokeFill = Fill(markerStroke),
+        strokeThickness = if (isAllZeros) 1.dp else 2.dp
+       /* fill = Fill(pointsGradient),
+        shape = CircleShape,
         strokeFill = Fill(Color(0xFFAD8AFF)),
-
-        strokeThickness = 2.dp
+        strokeThickness = 2.dp*/
     )
-
 
     val lineSpec = LineCartesianLayer.rememberLine(
-        fill = remember { LineCartesianLayer.LineFill.single(Fill(Color(0xFFAD8AFF))) },
-        // نستخدم interpolator بدلاً من pointConnector
-        interpolator = LineCartesianLayer.Interpolator.cubic(),//.MonotoneCubic(),
-
-
+        fill = remember { LineCartesianLayer.LineFill.single(Fill(lineColor/*Color(0xFFAD8AFF)*/)) },
+        interpolator = LineCartesianLayer.Interpolator.cubic(),
         pointProvider = remember {
             LineCartesianLayer.PointProvider.single(
-                // الحل: يجب تغليف الـ Component والـ sizeDp داخل كائن Point
                 LineCartesianLayer.Point(
                     component = dataMarkerComponent,
-                    size = 10.dp // حجم الدائرة الصغيرة
-                )
+                    size = if (isAllZeros) 6.dp else 10.dp
 
+                )
             )
         }
     )
 
-
-// 3. Display the chart
     val myRangeProvider = remember {
         object : CartesianLayerRangeProvider {
-            override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) =
-                0.0 // البدء من الصفر دائماً
-
+            override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = 0.0
             override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
-                maxY * 1.2 // إضافة 20% يدوياً
+                if (maxY == 0.0) 100.0 else maxY * 1.2// maxY * 1.2
         }
     }
 
-    CartesianChartHost(
+    // 🎯 2️⃣ استخدام الـ key لربط الـ Producer والـ Chart معاً عند تغيير الـ Tab
+  //  key(selectedTab) {
+        // إعادة إنشاء الـ Producer لتفريغ ذاكرة العرض والتوزيع القديم (7 نقاط vs 4 نقاط)
 
-        chart = rememberCartesianChart(
+    key(selectedTab) {
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(lineSpec),
+                    rangeProvider = myRangeProvider
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    label = axisLabelComponent,
+                    line = customLineAsBox,
+                    tick = null,
+                    guideline = null,
+                    // 🎯 3️⃣ الاستغناء عن extraStore والقراءة المباشرة
+                    valueFormatter =CartesianValueFormatter { _, value, _ ->
+                        val index = value.toInt()
+                        if (index in axisLabels.indices) {
+                            axisLabels[index]
+                        } else {
+                            ""
+                        }
 
-
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(lineSpec),
-                //  startAxis = VerticalAxis.rememberStart(),
-                // نستخدم الاسم الجديد هنا: rangeProvider بدلاً من axisValueOverrider
-                rangeProvider = myRangeProvider
-            ),
-
-
-            bottomAxis = HorizontalAxis.rememberBottom(
-
-                label = axisLabelComponent,
-                line = customLineAsBox,
-                tick = null,
-
-                guideline = null, // إخفاء الشبكة
-                valueFormatter = { context, value, _ ->
-
-                    daysOfWeek.getOrNull(value.toInt()) ?: ""
+                    }
+                ),
+                layerPadding = {
+                    CartesianLayerPadding(
+                        unscalableStart = 12.dp,
+                        unscalableEnd = 12.dp
+                    )
                 }
             ),
-
-
-            layerPadding = {
-                CartesianLayerPadding(
-                    // نستخدم unscalable لأن حجم الدائرة ثابت (مثلاً 10dp)
-                    unscalableStart = 12.dp,
-                    unscalableEnd = 12.dp,
-
-                    // الـ top والـ bottom عادة لا يحتاجان لتقسيم scalable/unscalable في التعريفات البسيطة
-                )
-            }
-
-
-        ),
-
-        modelProducer = modelProducer,
-
-        modifier = Modifier
-
-            // تحويل الـ top: 101px والـ left: 22px لمسافات داخلية
-            .padding(top = 20.dp, start = 4.dp, end = 4.dp, bottom = 20.dp)
-            .wrapContentWidth()
-            .heightIn(min = 110.dp, max = 150.dp)
-
-    )
-
+            modelProducer = modelProducer,
+            modifier = Modifier
+                .padding(top = 20.dp, start = 4.dp, end = 4.dp, bottom = 20.dp)
+                .wrapContentWidth()
+                .heightIn(min = 110.dp, max = 150.dp)
+        )
+   }
 }
 
 
 @Composable
-fun CustomTabRow() {
+fun CustomTabRow(  selectedTab:Int,         // 👈 يستقبل رقم فقط
+                 onTabSelected: (Int) -> Unit) {
     val titles = listOf("Day", "Week", "Month")
-    var state by remember { mutableStateOf(1) } // نبدأ بـ Week (Index 1)
+   // var state by remember { mutableStateOf(1) } // نبدأ بـ Week (Index 1)
 
     // الحاوية الخارجية لضبط الشكل العام (Glassmorphism)
     Card(
@@ -755,7 +766,7 @@ fun CustomTabRow() {
         border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.1f))
     ) {
         TabRow(
-            selectedTabIndex = state,
+            selectedTabIndex = selectedTab, //state,
             containerColor = Color.Transparent,
             contentColor = Color.White,
             divider = {}, // إخفاء الخط السفلي الافتراضي
@@ -765,9 +776,12 @@ fun CustomTabRow() {
 
         ) {
             titles.forEachIndexed { index, title ->
+                val isSelected = selectedTab == index
                 Tab(
-                    selected = state == index,
-                    onClick = { state = index },
+                   selected = isSelected,
+                   // selected = selectedTab == index,
+                    onClick = { onTabSelected(index)/*state = index*/
+                        Log.i("stateeeeeeeee:", index.toString())},
                     text = {
                         Text(
                             text = title,
@@ -775,8 +789,8 @@ fun CustomTabRow() {
                                 fontSize = 14.sp,
                                 fontFamily = FontFamily(Font(R.font.sfpro_medium)),
 
-                                fontWeight = if (state == index) FontWeight.Bold else FontWeight.Normal,
-                                color = if (state == index) Color.White else Color.White.copy(alpha = 0.7f)
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
                             )
                         )
                     }
@@ -2403,7 +2417,8 @@ fun DashboardScreenRoute(viewModel: StatsViewModel){
 
 
     DashboardScreen(
-        state = state
+        state = state,
+        onIntent = viewModel::onIntent
     )
 
 
@@ -2412,6 +2427,7 @@ fun DashboardScreenRoute(viewModel: StatsViewModel){
 @Composable
 fun DashboardScreen(
     state: StatsState,
+      onIntent: (StateIntent) -> Unit
 
 ) {
 
@@ -2464,7 +2480,11 @@ fun DashboardScreen(
         }
 
         Spacer(Modifier.height(50.dp))
-        CustomTabRow()
+        CustomTabRow(
+            selectedTab = state.selectedTab,
+            onTabSelected = { newIndex ->
+                onIntent(StateIntent.ChangeTab(newIndex))
+            })
         Spacer(Modifier.height(30.dp))
 
         Text(
@@ -2513,7 +2533,12 @@ fun DashboardScreen(
                     shape = RoundedCornerShape(17.dp)
                 )
         ) {
-            SimpleVicoChart()
+            SimpleVicoChart(
+                points = state.chartPoints,
+                selectedTab = state.selectedTab
+
+
+            )
         }
 
     }

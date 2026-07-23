@@ -25,7 +25,7 @@ class TaskOverviewViewModel(private val repository: TaskRepository): ViewModel()
     init {
         getSessionCountForDay()
         getTotalFocusTimeForDay()
-        getDailyEstimationAccuracy()
+        getEstimationAccuracy()
 
     }
 
@@ -70,13 +70,13 @@ class TaskOverviewViewModel(private val repository: TaskRepository): ViewModel()
         }
     }
 
-    fun getDailyEstimationAccuracy(
+    fun getEstimationAccuracy(
 
     ) {
         viewModelScope.launch()
         {
 
-            repository.getDailyEstimationAccuracy(
+            repository.getEstimationAccuracy(
                 startOfDay = DateTimeUtils.getStartOfDayMillis(),
                 endOfDay = DateTimeUtils.getEndOfDayMillis(),
                 status = SessionStatus.FINISHED

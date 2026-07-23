@@ -54,7 +54,7 @@ interface LocalSource {
         completedAt: Long
     )
 
-    fun getDailyEstimationAccuracy(
+    fun getEstimationAccuracy(
         startOfDay: Long,
         endOfDay: Long,
         status: SessionStatus = SessionStatus.FINISHED
@@ -69,5 +69,10 @@ interface LocalSource {
     fun getAllTimeSessionCount(
         status: SessionStatus = SessionStatus.FINISHED
     ): Flow<Long>
+
+
+    fun getDayChartPoints(): Flow<List<Number>>
+    fun getWeekChartPoints(): Flow<List<Number>>
+    fun getMonthChartPoints(): Flow<List<Number>>
 
 }

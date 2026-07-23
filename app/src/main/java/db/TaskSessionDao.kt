@@ -93,7 +93,7 @@ interface TaskSessionDao {
         AND created_at >= :startOfDay 
         AND created_at <= :endOfDay
     """)
-    fun getDailyEstimationAccuracy(
+    fun getEstimationAccuracy(
         startOfDay: Long,
         endOfDay: Long,
         status: SessionStatus = SessionStatus.FINISHED

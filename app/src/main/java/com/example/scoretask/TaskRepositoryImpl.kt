@@ -97,12 +97,12 @@ class TaskRepositoryImpl private constructor(
         localSource.updateSessionState(sessionId,status,completedAt)
     }
 
-    override fun getDailyEstimationAccuracy(
+    override fun getEstimationAccuracy(
         startOfDay: Long,
         endOfDay: Long,
         status: SessionStatus
     ): Flow<Double> {
-        return localSource.getDailyEstimationAccuracy(startOfDay,endOfDay,status)
+        return localSource.getEstimationAccuracy(startOfDay,endOfDay,status)
     }
 
 
@@ -115,6 +115,18 @@ class TaskRepositoryImpl private constructor(
     override fun getAllTimeSessionCount(status: SessionStatus): Flow<Long> {
 
         return localSource.getAllTimeSessionCount(status)
+    }
+
+    override fun getDayChartPoints(): Flow<List<Number>> {
+        return localSource.getDayChartPoints()
+    }
+
+    override fun getWeekChartPoints(): Flow<List<Number>> {
+       return localSource.getWeekChartPoints()
+    }
+
+    override fun getMonthChartPoints(): Flow<List<Number>> {
+        return localSource.getMonthChartPoints()
     }
 
 
