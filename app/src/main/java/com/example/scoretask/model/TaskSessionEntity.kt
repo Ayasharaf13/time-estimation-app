@@ -14,7 +14,8 @@ import androidx.room.PrimaryKey
             entity = TaskTemplateEntity::class,
             parentColumns = ["task_id"],
             childColumns = ["task_template_id"],
-            onDelete = ForeignKey.RESTRICT
+            onDelete = ForeignKey.CASCADE
+
         )
     ],
     indices = [
@@ -35,6 +36,7 @@ data class TaskSessionEntity(
     // User estimation
     @ColumnInfo(name = "original_estimate_ms")
     val originalEstimateMs: Long = 0L,//
+
 
     // Extension requested by the user
     @ColumnInfo(name = "added_extension_ms")

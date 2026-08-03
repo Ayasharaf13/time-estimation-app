@@ -17,7 +17,7 @@ import com.example.scoretask.utilities.Converters
         TaskSessionEntity::class,
         AppStatisticsEntity::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

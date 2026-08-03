@@ -1,16 +1,13 @@
-package db
+package com.example.scoretask.repository
 
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.example.scoretask.model.SessionStatus
 import com.example.scoretask.model.TaskSessionEntity
 import com.example.scoretask.model.TaskTemplateEntity
 import kotlinx.coroutines.flow.Flow
 
+interface TaskRepository {
 
-interface LocalSource {
 
     suspend fun insertTask(task: TaskTemplateEntity): Long
     suspend fun updateTask(task: TaskTemplateEntity)
@@ -24,7 +21,6 @@ interface LocalSource {
 
 
     suspend fun deleteTaskById(taskId: Long): Int
-
     suspend fun insertSession(session: TaskSessionEntity): Long
 
     suspend fun updateSession(session: TaskSessionEntity)
@@ -35,7 +31,6 @@ interface LocalSource {
         status: SessionStatus = SessionStatus.IDLE
     ): Flow<Int>
 
-
     suspend fun completeSession(
         sessionId: Long,
         status: SessionStatus,
@@ -44,12 +39,12 @@ interface LocalSource {
 
     )
 
-
     fun getTotalFocusTimeForDay(
         startOfDay: Long,
         endOfDay: Long,
         status: List<SessionStatus>
     ): Flow<Long>
+
 
     suspend fun updateSessionState(
         sessionId: Long,
@@ -78,6 +73,7 @@ interface LocalSource {
     fun getWeekChartPoints(): Flow<List<Number>>
     fun getMonthChartPoints(): Flow<List<Number>>
 
+
     suspend fun addExtensionToSession(
         sessionId: Long,
         addedExtensionMs: Long
@@ -96,5 +92,6 @@ interface LocalSource {
 
     @Query("UPDATE task_templates SET title = :newTitle WHERE task_id = :taskId")
     suspend fun updateTaskTitle(taskId: Long, newTitle: String)
+
 
 }

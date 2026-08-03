@@ -20,12 +20,14 @@ interface TaskSessionDao {
     suspend fun updateSession(session: TaskSessionEntity)
 
     // 3. الاستعلام التلقائي اللحظي اللي كتبناه
-    @Query("""
+    @Query(
+        """
         SELECT COUNT(*) FROM task_sessions
         WHERE status = :status 
         AND created_at >= :startOfDay 
         AND created_at <= :endOfDay
-    """)
+    """
+    )
 
     fun getSessionCountForDay(
         startOfDay: Long,
@@ -33,11 +35,13 @@ interface TaskSessionDao {
         status: SessionStatus = SessionStatus.IDLE
     ): Flow<Int>
 
-    @Query("""
+    @Query(
+        """
         UPDATE task_sessions 
         SET status = :status, completed_at = :completedAt , actual_duration_ms = :actualDuration
         WHERE session_id = :sessionId
-    """)
+    """
+    )
     suspend fun completeSession(
         sessionId: Long,
         status: SessionStatus,
@@ -46,11 +50,13 @@ interface TaskSessionDao {
 
     )
 
-    @Query("""
+    @Query(
+        """
         UPDATE task_sessions 
         SET status = :status, completed_at = :completedAt 
         WHERE session_id = :sessionId
-    """)
+    """
+    )
     suspend fun updateSessionState(
         sessionId: Long,
         status: SessionStatus,
@@ -58,24 +64,24 @@ interface TaskSessionDao {
     )
 
 
-    @Query("""
+    @Query(
+        """
     SELECT COALESCE(SUM(actual_duration_ms), 0) 
     FROM task_sessions
     WHERE status IN (:status)
     AND created_at >= :startOfDay 
     AND created_at <= :endOfDay
-""")
+"""
+    )
     fun getTotalFocusTimeForDay(
         startOfDay: Long,
         endOfDay: Long,
-        status:  List<SessionStatus>
+        status: List<SessionStatus>
     ): Flow<Long>
 
 
-
-
-
-    @Query("""
+    @Query(
+        """
         SELECT 
             CASE 
                 -- 1. الحماية من القسمة على صفر
@@ -88,11 +94,13 @@ interface TaskSessionDao {
                 -- 3. إذا أنهى المهمة في وقتها أو أسرع
                 ELSE (CAST(SUM(actual_duration_ms) AS REAL) / SUM(original_estimate_ms + added_extension_ms)) * 100
             END
+            
         FROM task_sessions
         WHERE status = :status 
         AND created_at >= :startOfDay 
         AND created_at <= :endOfDay
-    """)
+    """
+    )
     fun getEstimationAccuracy(
         startOfDay: Long,
         endOfDay: Long,
@@ -100,23 +108,58 @@ interface TaskSessionDao {
     ): Flow<Double>
 
 
-    @Query("""
+    @Query(
+        """
     SELECT COALESCE(SUM(actual_duration_ms), 0) 
     FROM task_sessions
     WHERE status IN (:status)
-""")
+"""
+    )
     fun getTotalFocusTimeAllTime(
         status: List<SessionStatus>
     ): Flow<Long>
 
 
-    @Query("""
+    @Query(
+        """
     SELECT COUNT(*) FROM task_sessions
     WHERE status = :status
-""")
+"""
+    )
     fun getAllTimeSessionCount(
         status: SessionStatus = SessionStatus.FINISHED
     ): Flow<Long>
+
+
+    @Query(
+        """
+    UPDATE task_sessions 
+    SET added_extension_ms = added_extension_ms + :addedExtensionMs 
+    WHERE session_id = :sessionId
+"""
+    )
+    suspend fun addExtensionToSession(
+        sessionId: Long,
+        addedExtensionMs: Long
+    )
+
+    @Query(
+        """
+    UPDATE task_sessions 
+    SET actual_duration_ms = actual_duration_ms + :additionalMs,
+        completed_at = :completedAt,
+        status = :status
+    WHERE session_id = :sessionId
+"""
+    )
+    suspend fun adjustActualDurationWithGap(
+        sessionId: Long,
+        additionalMs: Long,
+        status: SessionStatus = SessionStatus.FINISHED,
+        completedAt: Long = System.currentTimeMillis()
+    )
+
+
 }
 
 

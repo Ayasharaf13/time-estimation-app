@@ -42,35 +42,39 @@ class ConcreteLocalSource : LocalSource {
     }
 
     override suspend fun insertTask(task: TaskTemplateEntity): Long {
-     return taskTemplateDao.insertTask(task)
+        return taskTemplateDao.insertTask(task)
     }
 
     override suspend fun updateTask(task: TaskTemplateEntity) {
-      taskTemplateDao.updateTask(task)
+        taskTemplateDao.updateTask(task)
     }
 
     override suspend fun archiveTask(taskId: Long) {
-     taskTemplateDao.archiveTask(taskId)
+        taskTemplateDao.archiveTask(taskId)
     }
 
     override suspend fun restoreTask(taskId: Long) {
-      taskTemplateDao.restoreTask(taskId)
+        taskTemplateDao.restoreTask(taskId)
     }
 
-    override fun getAllTasks(): Flow<List<TaskTemplateEntity>>  {
-       return taskTemplateDao.getAllTasks()
+    override fun getAllTasks(): Flow<List<TaskTemplateEntity>> {
+        return taskTemplateDao.getAllTasks()
     }
 
     override suspend fun getTaskById(taskId: Long): TaskTemplateEntity? {
-     return  taskTemplateDao.getTaskById(taskId)
+        return taskTemplateDao.getTaskById(taskId)
     }
 
     override suspend fun isTitleExists(title: String): Boolean {
-       return taskTemplateDao.isTitleExists(title)
+        return taskTemplateDao.isTitleExists(title)
+    }
+
+    override suspend fun deleteTasksById(ids: List<Long>): Int {
+        return taskTemplateDao.deleteTasksById(ids)
     }
 
     override suspend fun deleteTaskById(taskId: Long): Int {
-      return taskTemplateDao.deleteTaskById(taskId)
+        return taskTemplateDao.deleteTaskById(taskId)
     }
 
     override suspend fun insertSession(session: TaskSessionEntity): Long {
@@ -78,7 +82,7 @@ class ConcreteLocalSource : LocalSource {
     }
 
     override suspend fun updateSession(session: TaskSessionEntity) {
-     taskSessionDao.updateSession(session)
+        taskSessionDao.updateSession(session)
     }
 
     override fun getSessionCountForDay(
@@ -86,7 +90,7 @@ class ConcreteLocalSource : LocalSource {
         endOfDay: Long,
         status: SessionStatus
     ): Flow<Int> {
-       return taskSessionDao.getSessionCountForDay(startOfDay,endOfDay,status)
+        return taskSessionDao.getSessionCountForDay(startOfDay, endOfDay, status)
     }
 
     override suspend fun completeSession(
@@ -95,9 +99,8 @@ class ConcreteLocalSource : LocalSource {
         completedAt: Long,
         actualDuration: Long
     ) {
-        taskSessionDao.completeSession(sessionId,status,completedAt,actualDuration)
+        taskSessionDao.completeSession(sessionId, status, completedAt, actualDuration)
     }
-
 
 
     override fun getTotalFocusTimeForDay(
@@ -105,7 +108,7 @@ class ConcreteLocalSource : LocalSource {
         endOfDay: Long,
         status: List<SessionStatus>
     ): Flow<Long> {
-       return  taskSessionDao.getTotalFocusTimeForDay(startOfDay,endOfDay,status)
+        return taskSessionDao.getTotalFocusTimeForDay(startOfDay, endOfDay, status)
     }
 
     override suspend fun updateSessionState(
@@ -113,7 +116,7 @@ class ConcreteLocalSource : LocalSource {
         status: SessionStatus,
         completedAt: Long
     ) {
-        taskSessionDao.updateSessionState(sessionId,status,completedAt)
+        taskSessionDao.updateSessionState(sessionId, status, completedAt)
     }
 
     override fun getEstimationAccuracy(
@@ -121,7 +124,7 @@ class ConcreteLocalSource : LocalSource {
         endOfDay: Long,
         status: SessionStatus
     ): Flow<Double> {
-        return  taskSessionDao. getEstimationAccuracy(startOfDay,endOfDay,status)
+        return taskSessionDao.getEstimationAccuracy(startOfDay, endOfDay, status)
     }
 
     override fun getTotalFocusTimeAllTime(status: List<SessionStatus>): Flow<Long> {
@@ -150,11 +153,20 @@ class ConcreteLocalSource : LocalSource {
         // 1. Morning (00:00 - 06:00)
         val p1Flow = taskSessionDao.getEstimationAccuracy(startOfDay, startOfDay + sixHoursMs)
         // 2. Afternoon (06:00 - 12:00)
-        val p2Flow = taskSessionDao.getEstimationAccuracy(startOfDay + sixHoursMs, startOfDay + (2 * sixHoursMs))
+        val p2Flow = taskSessionDao.getEstimationAccuracy(
+            startOfDay + sixHoursMs,
+            startOfDay + (2 * sixHoursMs)
+        )
         // 3. Evening (12:00 - 18:00)
-        val p3Flow = taskSessionDao.getEstimationAccuracy(startOfDay + (2 * sixHoursMs), startOfDay + (3 * sixHoursMs))
+        val p3Flow = taskSessionDao.getEstimationAccuracy(
+            startOfDay + (2 * sixHoursMs),
+            startOfDay + (3 * sixHoursMs)
+        )
         // 4. Night (18:00 - 24:00)
-        val p4Flow = taskSessionDao.getEstimationAccuracy(startOfDay + (3 * sixHoursMs), startOfDay + (4 * sixHoursMs))
+        val p4Flow = taskSessionDao.getEstimationAccuracy(
+            startOfDay + (3 * sixHoursMs),
+            startOfDay + (4 * sixHoursMs)
+        )
 
         // دمج الـ Flows الأربعة في قائمة واحدة للشارت
         return combine(p1Flow, p2Flow, p3Flow, p4Flow) { p1, p2, p3, p4 ->
@@ -216,6 +228,34 @@ class ConcreteLocalSource : LocalSource {
         return combine(weekFlows) { accuracies ->
             accuracies.map { (it as? Double) ?: 0.0 }
         }
+    }
+
+    override suspend fun addExtensionToSession(
+        sessionId: Long,
+        addedExtensionMs: Long
+    ) {
+        taskSessionDao.addExtensionToSession(sessionId, addedExtensionMs)
+    }
+
+    override suspend fun adjustActualDurationWithGap(
+        sessionId: Long,
+        additionalMs: Long,
+        status: SessionStatus,
+        completedAt: Long
+    ) {
+        taskSessionDao.adjustActualDurationWithGap(sessionId, additionalMs)
+    }
+
+    override fun getTaskTitleFlow(taskId: Long): Flow<String> {
+
+        return taskTemplateDao.getTaskTitleFlow(taskId)
+
+    }
+
+    override suspend fun updateTaskTitle(taskId: Long, newTitle: String) {
+
+        return taskTemplateDao.updateTaskTitle(taskId, newTitle)
+
     }
 
 

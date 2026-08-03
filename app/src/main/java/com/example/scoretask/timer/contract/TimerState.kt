@@ -1,0 +1,47 @@
+package com.example.scoretask.timer.contract
+
+import com.example.scoretask.model.SessionStatus
+import java.util.Locale
+
+data class TimerState(
+    val currentTime: Long = 0L,
+    val idTask: Long = 0L,
+    val idSession: Long = 0L,
+    val totalTime: Long = 0L,
+    val status: SessionStatus = SessionStatus.IDLE,
+    val showEndSessionDialog: Boolean = false,
+    val isExtraTime: Boolean = false,
+    val selectExtraTime: Int = 0,
+    val wasRunningBeforeDialog: Boolean = false,
+    val value: Float = 0.0f
+
+
+) {
+    // 💡 يُحسب تلقائياً بمجرد قراءة الـ State دون الحاجة لتحديثه يدوياً في الـ ViewModel
+    val progress: Float
+        get() = if (totalTime > 0) value * 360f else 0f//currentTime.toFloat() / totalTime.toFloat() else 0f
+
+    val isRunning: Boolean get() = status == SessionStatus.RUNNING
+
+    // 💡 النص جاهز تماماً للـ Text Composable بدون أي منطق رياضي بالشاشة
+    val formattedTime: String
+        get() {
+            val totalSeconds = currentTime / 1000L
+            val minutes = totalSeconds / 60
+            val seconds = totalSeconds % 60
+            return String.format("%02d:%02d", minutes, seconds)
+        }
+    val extraTimeFromMunToMill: Long
+        get() {
+            val extraTimeInMs = selectExtraTime * 60 * 1000L
+            return extraTimeInMs
+
+        }
+
+    fun Int.minutesToFormattedTime(): String {
+        return String.Companion.format(Locale.getDefault(), "%02d:00", this)
+    }
+
+    val totalTimeInMinutes: Int
+        get() = (totalTime / 1000L / 60L).toInt()
+}

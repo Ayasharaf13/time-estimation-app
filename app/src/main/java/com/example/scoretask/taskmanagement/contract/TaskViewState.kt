@@ -1,0 +1,19 @@
+package com.example.scoretask.taskmanagement.contract
+
+import com.example.scoretask.model.TaskTemplateEntity
+
+
+data class TaskUiState(
+
+
+    val isLoading: Boolean = false,
+    val tasksList: List<TaskTemplateEntity> = emptyList(),
+    val errorMessage: String? = null,
+    val sessionCount: Int = 0,
+    val totalMinutesToday: Long = 0,
+    val totalSecondsToday: Long = 0,
+    val showEditTitleDialog: Boolean = false,
+    val totalDailyEstimationAccuracy: Double = 0.0
+
+
+)

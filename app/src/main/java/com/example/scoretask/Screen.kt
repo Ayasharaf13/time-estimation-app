@@ -1,14 +1,16 @@
 package com.example.scoretask
 
-sealed   class Screen (val route:String) {
+sealed class Screen(val route: String) {
 
-     object Splash : Screen("splash_screen")
-     object Onboarding : Screen("onboarding_screen")
-     object MainHome : Screen("main_home_screen")
-     object Task: Screen("task_screen")
-     object Stats: Screen("stats_screen")
-     object TimerTask: Screen("timer_screen")
-     object TaskCompletion:Screen ("task_completion")
+    object Splash : Screen("splash_screen")
+    object Onboarding : Screen("onboarding_screen")
+    object MainHome : Screen("main_home_screen")
+    object Task : Screen("task_screen")
+    object Stats : Screen("stats_screen")
+    object TimerTask : Screen("timer_screen")
+    object TaskCompletion : Screen("task_completion")
+    object FeedBackScreen : Screen("Feed_Screen")
+    object FeedbackScreenExtraTime : Screen("Feedback_ExtraTime")
 
 
 }

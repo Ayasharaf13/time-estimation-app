@@ -1,51 +1,34 @@
 package com.example.scoretask
 
-import com.example.scoretask.model.SessionStatus
+
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,18 +36,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,8 +51,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.blur
+
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -82,13 +59,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
@@ -97,46 +69,47 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.Black
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.scoretask.model.TaskTemplateEntity
-import com.example.scoretask.model.totalMinutes
-import com.example.scoretask.ui.theme.AlarmTextStyle
 import com.example.scoretask.ui.theme.ScoreTaskTheme
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.compose.cartesian.layer.CartesianLayerPadding
-import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.common.Fill
-import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
-import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
-import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import db.ConcreteLocalSource
 import kotlinx.coroutines.delay
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.shadow
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.example.scoretask.dashboard.view.DashboardScreenRoute
+import com.example.scoretask.dashboard.viewmodel.StatsViewModel
+import com.example.scoretask.dashboard.viewmodel.StatsViewModelFactory
+import com.example.scoretask.feedback.view.FeedbackScreenExtraTime
+import com.example.scoretask.feedback.view.FeedbackScreenRoute
+import com.example.scoretask.feedback.viewmodel.FeedBackFactory
+import com.example.scoretask.feedback.viewmodel.FeedBackViewModel
+import com.example.scoretask.repository.TaskRepository
+import com.example.scoretask.repository.TaskRepositoryImpl
+import com.example.scoretask.taskcompletion.view.TaskCompletionRoute
+import com.example.scoretask.taskcompletion.viewmodel.TaskCompletionFactory
+import com.example.scoretask.taskcompletion.viewmodel.TaskCompletionViewModel
+import com.example.scoretask.taskmanagement.contract.TaskIntent
+import com.example.scoretask.taskmanagement.view.HomeRoute
+import com.example.scoretask.taskmanagement.view.TaskRoute
+import com.example.scoretask.taskmanagement.viewmodel.TaskOverviewViewModel
+import com.example.scoretask.taskmanagement.viewmodel.TaskOverviewViewModelFactory
+import com.example.scoretask.taskmanagement.viewmodel.TaskViewModel
+import com.example.scoretask.taskmanagement.viewmodel.TaskViewModelFactory
+import com.example.scoretask.timer.view.ScoreRoute
+import com.example.scoretask.timer.viewmodel.TimerViewModel
+import com.example.scoretask.timer.viewmodel.TimerViewModelFactory
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
@@ -148,18 +121,6 @@ class MainActivity : ComponentActivity() {
         val localSource = ConcreteLocalSource.getInstance(applicationContext)
         val repository = TaskRepositoryImpl.getInstance(localSource)
 
-        // 🛠️ 2. إنشاء الـ ViewModel بـ السطر المعتمد من جوجل باستخدام الـ Factory
-     /*   val taskViewModel: TaskViewModel by viewModels {
-            TaskViewModelFactory(repository)
-        }
-
-        val taskOverViewViewModel: TaskOverviewViewModel by viewModels {
-            TaskOverviewViewModelFactory(repository)
-        }*/
-
-       /* val timerViewModel: TimerViewModel by viewModels {
-            TimerViewModelFactory(repository)
-        }*/
 
 
         setContent {
@@ -172,22 +133,23 @@ class MainActivity : ComponentActivity() {
                 // 1. تعريف الـ NavController الرئيسي للتطبيق كله
                 val rootNavController = rememberNavController()
 
-
+                val sharedTaskViewModel: TaskViewModel = viewModel(
+                    factory = TaskViewModelFactory(repository)
+                )
                 // 2. الـ NavHost الرئيسي (المسرح الأكبر للتطبيق)
                 NavHost(
                     navController = rootNavController,
                     startDestination = Screen.Splash.route // نقطة انطلاق التطبيق الحتمية
                 ) {
 
-
-
-
                     // --- المرحلة الأولى: الـ Splash ---
                     composable(route = Screen.Splash.route) {
+
                         SplashScreen(
                             onTimeout = {
                                 rootNavController.navigate(Screen.Onboarding.route) {
                                     popUpTo(Screen.Splash.route) { inclusive = true }
+
                                 }
                             }
                         )
@@ -207,35 +169,200 @@ class MainActivity : ComponentActivity() {
 
                     composable(route = Screen.MainHome.route) {
 
-                        BottomNav( rootNavController,repository)
+                        BottomNav(rootNavController, repository, sharedTaskViewModel)
                     }
 
 
-
-                    // val state by timerViewModel.state.collectAsStateWithLifecycle()
                     // 🚀 سجلنا شاشة التايمر هنا كشاشة كاملة في الخريطة الكبرى
-                    composable(route = Screen.TimerTask.route) {
+                    composable(
+
+                        route = "${Screen.TimerTask.route}?sessionId={sessionId}&extraTimeMs={extraTimeMs}&isExtraTime={isExtraTime}",
+                        arguments = listOf(
+                            navArgument("sessionId") {
+                                type = NavType.LongType
+                                defaultValue = 0L
+                            },
+                            navArgument("extraTimeMs") {
+                                type = NavType.IntType
+                                defaultValue = 0
+                            },
+                            navArgument("isExtraTime") {
+                                type = NavType.BoolType
+                                defaultValue = false
+                            }
+                        )
+                    ) { backStackEntry ->
+
+                        val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: 0L
+                        val extraTimeMs = backStackEntry.arguments?.getInt("extraTimeMs") ?: 0
+                        val isExtraTime =
+                            backStackEntry.arguments?.getBoolean("isExtraTime") ?: false
+
 
                         val timerViewModel: TimerViewModel = viewModel(
-                            factory = TimerViewModelFactory(repository)
+                            factory = TimerViewModelFactory(
+                                repository, isExtraTime = isExtraTime,
+                                extraTimeMs = extraTimeMs, sessionId = sessionId
+                            )
                         )
 
-                        ScoreRoute(timerViewModel, rootNavController)
+
+                        // 3️⃣ تحويل القيمة لـ Int إذا كانت دالة ScoreRoute تتوقع Int
+                        ScoreRoute(
+                            viewModel = timerViewModel,
+                            sharedTaskViewModel = sharedTaskViewModel,
+                            navController = rootNavController,
+
+
+                            )
+
                     }
                     composable(
-                        route = "${Screen.TaskCompletion.route}/{expectedTime}",
-                    arguments = listOf(navArgument("expectedTime") { type = NavType.IntType })//(route = Screen.TaskCompletion.route){//TaskCompletion.route){
+
+                        route = "${Screen.FeedbackScreenExtraTime.route}/{sessionId}",
+                        arguments = listOf(
+                            navArgument("sessionId") { type = NavType.LongType }
+                        )
+                    ) { backStackEntry ->
+                        val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: 0L
+                        val scope = rememberCoroutineScope()
+
+                        FeedbackScreenExtraTime(
+                            onConfirmFeedback = { wasEnough, gapMinutes ->
+                                Log.i(
+                                    "TEST_DEBUG",
+                                    "1. Button Clicked with gapMinutes: $gapMinutes"
+                                )
+                                val selectGapMinutes = gapMinutes * 60 * 1000L
+                                // 🎯 2. تحديث قاعدة البيانات مباشرة دون الحاجة لـ ViewModel جديد!
+
+                                scope.launch {
+                                    try {
+                                        Log.i("TEST_DEBUG", "2. Starting DB Update...")
+                                        withContext(NonCancellable) {
+                                            repository.adjustActualDurationWithGap(
+                                                sessionId = sessionId,
+                                                additionalMs = selectGapMinutes,
+
+                                                )
+                                        }
+                                        Log.i("ssid", sessionId.toString())
+                                        // 🎯 3. العودة للشاشة الرئيسية بعد التحديث
+                                        rootNavController.navigate(Screen.MainHome.route) {
+                                            popUpTo(Screen.FeedbackScreenExtraTime.route) {
+                                                inclusive = true
+                                            }
+                                        }
+
+                                    } catch (e: Exception) {
+                                        Log.e("ssid", "Error updating database: ${e.message}")
+                                    }
+                                }
+                            }
+
+
+                        )
+
+                    }
+
+
+
+                    composable(
+                        // 💡 إضافة الـ arguments للمسار بنفس الترتيب
+                        route = "${Screen.FeedBackScreen.route}/{expectTime}/{sessionId}/{status}/{extraTimeMinutes}",
+                        arguments = listOf(
+                            navArgument("expectTime") { type = NavType.LongType },
+                            navArgument("sessionId") { type = NavType.LongType },
+                            navArgument("status") {
+                                type = NavType.StringType
+                            }, // أو EnumType حسب تعريفك
+                            navArgument("extraTimeMinutes") { type = NavType.IntType }
+
+
+                        )
+                    ) { backStackEntry ->
+                        // 💡 استخراج القيم الممررة من الـ backStackEntry
+                        val expectTime = backStackEntry.arguments?.getInt("expectTime") ?: 0
+                        val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: 0L
+                        val statusName = backStackEntry.arguments?.getString("status") ?: ""
+                        //   val selectedStatus = backStackEntry.arguments?.getString("selectedStatus") ?: ""
+                        val extraTimeMinutes =
+                            backStackEntry.arguments?.getInt("extraTimeMinutes") ?: 0
+
+                        val feedBackViewModel: FeedBackViewModel = viewModel(
+                            factory = FeedBackFactory(repository)
+                        )
+
+
+                        val (feedbackTitle, imageRes) = when (statusName) {
+                            // 1. Finished and requested extra time (FINISH_EXTRA)
+                            TaskResultStatus.FINISH_EXTRA.name -> {
+                                "Great Job" to R.drawable.img_finish_need_extra_time// استبدلي اسم الصورة بصورتك المناسبة
+                            }
+
+                            // 2. Not finished and didn't request extra time (NOT_FINISH)
+                            TaskResultStatus.NOT_FINISH.name -> {
+                                "So Furious" to R.drawable.img_not_finish
+                            }
+
+                            // 3. Not finished and requested extra time (NOT_FINISH_EXTRA)
+                            TaskResultStatus.NOT_FINISH_EXTRA.name -> {
+                                "Go On!" to R.drawable.img_lazy // استبدلي اسم الصورة بصورتك المناسبة
+                            }
+
+                            TaskResultStatus.FINISH.name -> {
+                                "Great Job!" to R.drawable.img_finish // استبدلي اسم الصورة بصورتك المناسبة
+                            }
+
+                            // 💡 حالة افتراضية fallback تحسباً لأي قيمة أخرى
+                            else -> {
+                                //
+                                "Great Job" to R.drawable.img_finish
+                            }
+                        }
+                        FeedbackScreenRoute(
+
+                            title = feedbackTitle,
+                            imageRes = imageRes,
+                            sessionId = sessionId,
+                            extraTimeMinutes = extraTimeMinutes,
+                            viewModel = feedBackViewModel,
+                            navController = rootNavController,
+                            taskViewModel = sharedTaskViewModel
+
+                        )
+
+
+                    }
+
+
+
+
+                    composable(
+                        route = "${Screen.TaskCompletion.route}/{expectedTime}/{sessionId}",
+                        arguments = listOf(
+                            navArgument("expectedTime") { type = NavType.IntType },
+                            navArgument("sessionId") { type = NavType.LongType }
+                        )
+
                     ) { backStackEntry ->
                         // استخراج القيمة بأمان
                         val expectedTime = backStackEntry.arguments?.getInt("expectedTime") ?: 0
-
+                        val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: 0L
+                        val taskCompletionViewModel: TaskCompletionViewModel = viewModel(
+                            factory = TaskCompletionFactory(repository)
+                        )
                         // باصي الرقم لشاشتكِ الجميلة
-                        TaskCompletion(expectedTime)
+                        //  TaskCompletion(expectedTime)
+                        TaskCompletionRoute(
+                            expectedTime,
+                            sessionId,
+                            taskCompletionViewModel,
+                            rootNavController,
+                            sharedTaskViewModel
+                        )
 
                     }
-
-
-
 
 
                 }
@@ -245,13 +372,13 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
-
     @Composable
-    fun BottomNav(rootNavController: NavController,repository: TaskRepository) {
-        val sharedTaskViewModel: TaskViewModel = viewModel(
-            factory = TaskViewModelFactory(repository)
-        )
+    fun BottomNav(
+        rootNavController: NavController,
+        repository: TaskRepository,
+        sharedTaskViwModel: TaskViewModel
+    ) {
+
 
         val sharedTaskOverViewViewModel: TaskOverviewViewModel = viewModel(
             factory = TaskOverviewViewModelFactory(repository)
@@ -374,7 +501,7 @@ class MainActivity : ComponentActivity() {
         { innerPadding ->
 
 
-                // 2. الشاشة الأولى (Task Screen)
+            // 2. الشاشة الأولى (Task Screen)
 
 
             NavHost(
@@ -386,37 +513,32 @@ class MainActivity : ComponentActivity() {
                 composable(route = Screen.MainHome.route) {
 
 
-                   HomeRoute(viewModel = sharedTaskViewModel,
-                       onNavigateToTimer = {
+                    HomeRoute(
+                        viewModel = sharedTaskViwModel,
+                        onNavigateToTimer = {
 
-                           // هنا نأمر الموجه الأكبر بفتح شاشة التايمر المسجلة فوق
-                           rootNavController.navigate(Screen.TimerTask.route)
-                       }
-                   )
-                   // HomeScreen()
+                            // هنا نأمر الموجه الأكبر بفتح شاشة التايمر المسجلة فوق
+                            rootNavController.navigate(Screen.TimerTask.route)
+                        }
+                    )
 
-                   // TaskScreenWrapper(viewModel = taskViewModel )
                 }
                 composable(route = Screen.Task.route) {
 
 
-                    TaskRoute(sharedTaskViewModel,sharedTaskOverViewViewModel)
-                   // DailyOverviewScreen(taskViewModel)
+                    TaskRoute(sharedTaskViwModel, sharedTaskOverViewViewModel, rootNavController)
+
 
                 }
                 composable(
                     route = Screen.Stats.route
                 ) {
-                    DashboardScreenRoute(StateViewModel)
-                   // DashboardScreen()
-                   // ScoreTaskTimer()
+                    DashboardScreenRoute(StateViewModel, rootNavController)
+
                 }
 
 
-
             }
-
-
 
 
             val SplashCenterColor = Color(0xFF6B3FE2) // اللون الأرجواني الفاتح في الوسط
@@ -444,7 +566,7 @@ private data class PreparedGlow(
     val alpha: Float = 1.0f,
     val radius: Float,
 
-)
+    )
 
 @Composable
 fun AppGlowBackground(
@@ -458,11 +580,11 @@ fun AppGlowBackground(
     val color2 = Color(0xFFE3EAFF)
     val color3 = Color(0xFF8350DB)
     val basePurple = Color(0xFF4A2997)
-   // val basePurple = Color(0xFF6943AC)
+    // val basePurple = Color(0xFF6943AC)
 // بنبدأ بالخلفية البنفسجية الأساسية
 
     Box(
-       modifier =  modifier
+        modifier = modifier
             .fillMaxSize()
             .background(basePurple)
             .drawWithCache {
@@ -478,7 +600,7 @@ fun AppGlowBackground(
                     val offsetX = size.width * (glow.offsetXRatio / designWidth)
 
                     val offsetY = size.height * (glow.offsetYRatio / designHeight)
-                     Log.i("size width: ",size.width.toString())
+                    Log.i("size width: ", size.width.toString())
                     val centerX = offsetX + (glowWidth * 0.6186f)
                     val centerY = offsetY + (glowHeight * 0.3892f)
                     val calculatedRadius = glowWidth * glow.radiusPercent/*0.5772f*/
@@ -502,7 +624,7 @@ fun AppGlowBackground(
                         shapeType = glow.shapeType,
                         topLeft = Offset(offsetX, offsetY),
                         size = Size(glowWidth, glowHeight),
-                       // size = Size(size.width, glowHeight),
+                        // size = Size(size.width, glowHeight),
                         center = Offset(centerX, centerY),
                         radius = calculatedRadius,
                         alpha = glow.alpha
@@ -520,26 +642,27 @@ fun AppGlowBackground(
 
                                 blendMode = BlendMode.Overlay
                             )
+
                             GlowShape.OVAL -> drawOval(
                                 brush = glow.brush,
                                 topLeft = glow.topLeft,
                                 size = glow.size,
                                 blendMode = BlendMode.Overlay
                             )
+
                             GlowShape.RECTANGLE -> drawRect(
                                 brush = glow.brush,
                                 topLeft = glow.topLeft,
-                                size = Size(size.width, glow.size.width), // استخدام عرض الشاشة الحقيقي للتصميم المستطيل
+                                size = Size(
+                                    size.width,
+                                    glow.size.width
+                                ), // استخدام عرض الشاشة الحقيقي للتصميم المستطيل
                                 blendMode = BlendMode.Overlay
                             )
                         }
                     }
                 }
-            }
-           /* .blur(
-                radius = 81.dp,
-                edgeTreatment = BlurredEdgeTreatment.Unbounded
-            )*/,
+            },
         content = content
     )
 }
@@ -548,8 +671,22 @@ fun AppGlowBackground(
 fun BgScreen() {
     val bgGlows = remember {
         listOf(
-            GlowConfig(widthRatio = 938f, heightRatio = 1078f, offsetXRatio = -287f, offsetYRatio = -378f, shapeType = GlowShape.CIRCLE, radiusPercent = 0.47f),
-            GlowConfig(widthRatio = 938f, heightRatio = 1078f, offsetXRatio = 177f, offsetYRatio = 509f, shapeType = GlowShape.CIRCLE, radiusPercent = 0.44f)
+            GlowConfig(
+                widthRatio = 938f,
+                heightRatio = 1078f,
+                offsetXRatio = -287f,
+                offsetYRatio = -378f,
+                shapeType = GlowShape.CIRCLE,
+                radiusPercent = 0.47f
+            ),
+            GlowConfig(
+                widthRatio = 938f,
+                heightRatio = 1078f,
+                offsetXRatio = 177f,
+                offsetYRatio = 509f,
+                shapeType = GlowShape.CIRCLE,
+                radiusPercent = 0.44f
+            )
         )
     }
 
@@ -582,312 +719,20 @@ val basePurple = Color(0xFF4A2997)
 
 val color1 = Color(0xFFEBEBEB)
 val color2 = Color(0xFFE3EAFF)
-val colorSplash3 = Color(0xFF8350DB)
-val color3 = Color(0xFF6943AC)
-
-
-
-@SuppressLint("RestrictedApi")
-@Composable
-fun SimpleVicoChart(
-    points: List<Number>,
-    selectedTab: Int
-) {
-    val pointsGradient = Brush.verticalGradient(
-        0.149f to Color(0xFFA47FFB),
-        1.0f to Color(0xFF614B95)
-    )
-
-
-
-    val modelProducer = remember(selectedTab) { CartesianChartModelProducer() }
-
-    // 1️⃣ تجهيز التسميات للـ Tab الحالي
-    val axisLabels = remember(selectedTab) {
-        when (selectedTab) {
-           0 -> listOf("Morning", "Afternoon", "Evening", "Night")
-            1 -> listOf("Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri")
-            2 -> listOf("W1", "W2", "W3", "W4")
-            else -> listOf("Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri")
-        }
-    }
-
-
-
-    val safePoints = remember(points, axisLabels) {
-        if (points.isNotEmpty() && points.size == axisLabels.size) {
-            points
-        } else {
-            List(axisLabels.size) { 0 }
-        }
-    }
-
-    val isAllZeros = remember(safePoints) {
-        safePoints.all { it.toDouble() == 0.0 }
-    }
-
-    // 🎯 🎯 [تعديل 2]: تحديد الشفافية والألوان بناءً على حالة البيانات
-    val lineColor = if (isAllZeros) Color(0xFFAD8AFF).copy(alpha = 0.25f) else Color(0xFFAD8AFF)
-   // val markerColor = if (isAllZeros) Color(0xFFA47FFB).copy(alpha = 0.25f) else Color(0xFFA47FFB)
-    val markerStroke = if (isAllZeros) Color(0xFFAD8AFF).copy(alpha = 0.4f) else Color(0xFFAD8AFF)
-
-    val pointGradient = Brush.verticalGradient(
-        0.149f to (if (isAllZeros) Color(0xFFA47FFB).copy(alpha = 0.2f) else Color(0xFFA47FFB)),
-        1.0f to (if (isAllZeros) Color(0xFF614B95).copy(alpha = 0.2f) else Color(0xFF614B95))
-    )
-    // إرسال النقاط الجديدة فقط بدون extras
-    LaunchedEffect(safePoints,selectedTab) {
-        modelProducer.runTransaction {
-
-            lineSeries {
-                val xValues = safePoints.indices.toList()
-                series(x = xValues, y = safePoints)
-            }
-             /*lineSeries {
-                 series(points)
-             }*/
-        }
-    }
-
-    val borderBrush = Brush.linearGradient(
-        0.0f to Color(255, 255, 255).copy(alpha = 0.0476f),
-        1.0f to Color(107, 114, 128).copy(alpha = 0.2516f)
-    )
-
-    val customLineAsBox = rememberLineComponent(
-        fill = Fill(Color.Transparent),
-        thickness = 10.dp,
-        strokeThickness = 1.dp,
-        strokeFill = Fill(borderBrush)
-    )
-
-    val axisLabelComponent = rememberTextComponent(
-        style = TextStyle(
-            color = Color(0xFFA6A6A6),
-            fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-            fontWeight = FontWeight.W700,
-            fontSize = 8.sp,
-            lineHeight = 12.sp,
-            letterSpacing = 0.sp,
-            textAlign = TextAlign.Center
-        )
-    )
-
-    val dataMarkerComponent = rememberShapeComponent(
-        fill = Fill(pointsGradient),
-        shape = CircleShape,
-        strokeFill = Fill(markerStroke),
-        strokeThickness = if (isAllZeros) 1.dp else 2.dp
-       /* fill = Fill(pointsGradient),
-        shape = CircleShape,
-        strokeFill = Fill(Color(0xFFAD8AFF)),
-        strokeThickness = 2.dp*/
-    )
-
-    val lineSpec = LineCartesianLayer.rememberLine(
-        fill = remember { LineCartesianLayer.LineFill.single(Fill(lineColor/*Color(0xFFAD8AFF)*/)) },
-        interpolator = LineCartesianLayer.Interpolator.cubic(),
-        pointProvider = remember {
-            LineCartesianLayer.PointProvider.single(
-                LineCartesianLayer.Point(
-                    component = dataMarkerComponent,
-                    size = if (isAllZeros) 6.dp else 10.dp
-
-                )
-            )
-        }
-    )
-
-    val myRangeProvider = remember {
-        object : CartesianLayerRangeProvider {
-            override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = 0.0
-            override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
-                if (maxY == 0.0) 100.0 else maxY * 1.2// maxY * 1.2
-        }
-    }
-
-    // 🎯 2️⃣ استخدام الـ key لربط الـ Producer والـ Chart معاً عند تغيير الـ Tab
-  //  key(selectedTab) {
-        // إعادة إنشاء الـ Producer لتفريغ ذاكرة العرض والتوزيع القديم (7 نقاط vs 4 نقاط)
-
-    key(selectedTab) {
-        CartesianChartHost(
-            chart = rememberCartesianChart(
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(lineSpec),
-                    rangeProvider = myRangeProvider
-                ),
-                bottomAxis = HorizontalAxis.rememberBottom(
-                    label = axisLabelComponent,
-                    line = customLineAsBox,
-                    tick = null,
-                    guideline = null,
-                    // 🎯 3️⃣ الاستغناء عن extraStore والقراءة المباشرة
-                    valueFormatter =CartesianValueFormatter { _, value, _ ->
-                        val index = value.toInt()
-                        if (index in axisLabels.indices) {
-                            axisLabels[index]
-                        } else {
-                            ""
-                        }
-
-                    }
-                ),
-                layerPadding = {
-                    CartesianLayerPadding(
-                        unscalableStart = 12.dp,
-                        unscalableEnd = 12.dp
-                    )
-                }
-            ),
-            modelProducer = modelProducer,
-            modifier = Modifier
-                .padding(top = 20.dp, start = 4.dp, end = 4.dp, bottom = 20.dp)
-                .wrapContentWidth()
-                .heightIn(min = 110.dp, max = 150.dp)
-        )
-   }
-}
 
 
 @Composable
-fun CustomTabRow(  selectedTab:Int,         // 👈 يستقبل رقم فقط
-                 onTabSelected: (Int) -> Unit) {
-    val titles = listOf("Day", "Week", "Month")
-   // var state by remember { mutableStateOf(1) } // نبدأ بـ Week (Index 1)
-
-    // الحاوية الخارجية لضبط الشكل العام (Glassmorphism)
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .height(50.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF4A358E).copy(alpha = 0.5f)),
-        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.1f))
-    ) {
-        TabRow(
-            selectedTabIndex = selectedTab, //state,
-            containerColor = Color.Transparent,
-            contentColor = Color.White,
-            divider = {}, // إخفاء الخط السفلي الافتراضي
-            indicator = { tabPositions ->
-
-            }
-
-        ) {
-            titles.forEachIndexed { index, title ->
-                val isSelected = selectedTab == index
-                Tab(
-                   selected = isSelected,
-                   // selected = selectedTab == index,
-                    onClick = { onTabSelected(index)/*state = index*/
-                        Log.i("stateeeeeeeee:", index.toString())},
-                    text = {
-                        Text(
-                            text = title,
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontFamily = FontFamily(Font(R.font.sfpro_medium)),
-
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
-                            )
-                        )
-                    }
-                )
-
-
-            }
-        }
-    }
-}
-
-
-@Composable
-fun TimeMuscleProgressIndicator(
-    state: TaskUiState ,
-     // progress:Float,                         //Float, // القيمة من 0.0 إلى 1.0
-    modifier: Modifier = Modifier
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-
-        modifier = modifier
-            .size(100.dp)
-
-
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            // --- 1. رسم الدائرة الخلفية (Background Circle) ---
-            val backgroundRadius = size.minDimension / 2f
-            drawCircle(
-                color = Color(0xFF4D308F),
-                radius = backgroundRadius,
-                // style = Fill
-            )
-            // إطار الدائرة الرفيع جداً (0.3dp)
-            drawCircle(
-                color = Color(0xFF684DA7),
-                radius = backgroundRadius,
-                style = Stroke(width = 0.3.dp.toPx())
-            )
-
-
-            // محاكاة Conic Gradient باستخدام SweepGradient
-            val sweepGradient = Brush.sweepGradient(
-                0.0f to Color(0xFF200C4E),
-                0.5f to Color(0xFF7F69B3),
-                1.0f to Color(0xFF200C4E),
-                center = Offset(size.width * 0.5612f, size.height * 0.5255f)
-            )
-
-            drawArc(
-                brush = sweepGradient,
-                startAngle = -90f, // البدء من الأعلى (الساعة 12)
-                sweepAngle = 360f * (state.totalDailyEstimationAccuracy.toFloat() / 100f) ,//progress,
-                useCenter = false,
-                style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round),
-
-                )
-        }
-
-        val accuracy = state.totalDailyEstimationAccuracy // القيمة القادمة من الـ ViewModel (مثلاً 90.62)
-
-// كود التنسيق النظيف
-        val formattedAccuracy = if (accuracy % 1 == 0.0) {
-            "${accuracy.toInt()}%"
-        } else {
-            "${String.format("%.1f", accuracy)}%" // 👈 ستظهر: 90.6% (علامة عشرية واحدة)
-        }
-
-
-
-        Text(
-            text = formattedAccuracy,
-                style = TextStyle(
-                fontWeight = Black,
-                lineHeight = 11.sp,
-                letterSpacing = 1.sp,// FontWeight(860),
-                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-
-                ),
-            color = Color.White, fontSize = 16.sp
-        )
-    }
-}
-//CustomTopAppBar
-
-@Composable
-fun ScreenHeader (
+fun ScreenHeader(
     title: String,
     // 1. تمرير الأيقونة اليسرى كـ Resource ID، وافتراضياً هي أيقونة الـ Back الخاص بكِ
     @DrawableRes navigationIcon: Int = R.drawable.icon_back,
     onNavigationClick: () -> Unit = {},
-
     // 2. زر التعديل نجعله اختياري (null بافتراض)
     showEditButton: Boolean = false,
-    onEditClick: () -> Unit = {}
+    onEditClick: (TaskIntent) -> Unit = {}
+
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -931,8 +776,12 @@ fun ScreenHeader (
                     .wrapContentSize(),
                 contentAlignment = Alignment.Center
             ) {
+
                 Button(
-                    onClick = onEditClick,
+                    onClick =
+                        { onEditClick(TaskIntent.EditTask) },
+
+
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White,
                         contentColor = Color.Black
@@ -969,44 +818,6 @@ fun ScreenHeader (
         }
     }
 }
-/*
-@Composable
-fun RowCard(
-    title: String,             // نمرر النص هنا
-    iconResId: Int
-) {
-    var isChecked by remember { mutableStateOf(true) }
-
-    Row(
-        Modifier.padding(start = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            painter = painterResource(id = iconResId/*R.drawable.img_finish*/),
-            contentDescription = null,
-            tint = Color.Unspecified,
-            modifier = Modifier.width(61.dp).height(41.dp).padding(start = 8.dp)
-
-        )
-
-        Text(
-            title,
-            color = Color.White,
-            fontSize = 14.sp,
-            lineHeight = 11.sp,
-            modifier = Modifier.weight(1f),
-            fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-            fontWeight = FontWeight.Bold,
-
-            )
-        Checkbox(
-            checked = isChecked,
-            onCheckedChange = { isChecked = it },
-
-            )
-
-    }
-}*/
 
 enum class TaskResultStatus(val title: String) {
     FINISH("Finish"),
@@ -1028,19 +839,13 @@ enum class TaskResultStatus(val title: String) {
 
     fun getPsychologyOptions(): List<String> {
         return when (this) {
-            FINISH_EXTRA-> emptyList()
-
-                    //  FINISH -> emptyList()
-           /* FINISH_EXTRA -> listOf(
-                "🧩 Task was more complex than expected",
-                "📝 Need extra polish / double-check",
-                "⏳ Underestimated the required sub-tasks"
-            )*/
+            FINISH_EXTRA -> emptyList()
             NOT_FINISH -> listOf(
                 "🥱 I lost momentum / got distracted",
                 "🧠 Cognitive fatigue / brain fog",
                 "🛑 Hit a hard roadblock / got stuck"
             )
+
             NOT_FINISH_EXTRA -> listOf(
                 "⚡ Unexpected friction or technical bug",
                 "📱 Environment / notification distraction",
@@ -1053,1669 +858,255 @@ enum class TaskResultStatus(val title: String) {
 
     // دالة ترجع خيارات الوقت بالدقائق لكل حالة (ديناميكية)
     fun getDurationOptions(expectTime: Int): List<Int> {
-        val halfTime = (expectTime / 2).coerceAtLeast(5)
+        // val halfTime = (expectTime / 2).coerceAtLeast(5)
         return when (this) {
 
-           // FINISH -> listOf(5, 10) // وقت بسيط للمراجعة
+            // FINISH -> listOf(5, 10) // وقت بسيط للمراجعة
             FINISH_EXTRA -> {
-                val op1 = (halfTime - 5).coerceAtLeast(halfTime + 10)
-                val op2 = halfTime
-                val op3 = halfTime + 5
-                listOf(op1, op2, op3)
-            }
-            NOT_FINISH ->emptyList()// listOf(15, 30, 45, 60) // وقت كبير لجلسة تانية
+                val op1 = (expectTime * 0.25).toInt()
+                    .coerceAtLeast(5)
+                    .coerceAtMost(expectTime)
 
-           NOT_FINISH_EXTRA -> {
-               val op1 = halfTime
-               val op2 = halfTime + 10
-               val op3 = halfTime + 20
-               listOf(op1, op2, op3)
-           }
+                // 🎯 الخيار 2 (50% من الوقت الأصلي) - النصف
+                val op2 = (expectTime * 0.50).toInt()
+                    .coerceAtLeast(op1 + 5) // يضمن أن op2 أكبر من op1
+                    .coerceAtMost(expectTime)
+
+                // 🎯 الخيار 3 (75% من الوقت الأصلي) - أقصى حد مسموح به دون تجاوز expectTime
+                val op3 = (expectTime * 0.75).toInt()
+                    .coerceAtLeast(op2 + 5) // يضمن أن op3 أكبر من op2
+                    .coerceAtMost(expectTime)
+
+                // إرجاع القائمة بدون تكرار في حال كانت الأوقات صغيرة جداً (e.g. distinct)
+                listOf(0, op1, op2, op3).distinct()
+            }
+
+            NOT_FINISH -> emptyList()// listOf(15, 30, 45, 60) // وقت كبير لجلسة تانية
+
+            NOT_FINISH_EXTRA -> {
+                val op1 = (expectTime * 0.20).toInt()
+                    .coerceAtLeast(5)
+                    .coerceAtMost(expectTime)
+
+                // 🎯 الخيار 2: 35% من الوقت الأصلي (تمديد متوسط)
+                val op2 = (expectTime * 0.35).toInt()
+                    .coerceAtLeast(op1 + 5)
+                    .coerceAtMost(expectTime)
+
+                // 🎯 الخيار 3: 50% من الوقت الأصلي (أقصى تمديد مسموح لتجنب الإجهاد المعرفي)
+                val op3 = (expectTime * 0.50).toInt()
+                    .coerceAtLeast(op2 + 5)
+                    .coerceAtMost(expectTime)
+
+                listOf(0, op1, op2, op3).distinct()
+            }
+
             else -> emptyList()
         }
     }
 }
+
+
 @Composable
-fun RowCard(
-    title: String,
-    iconResId: Int,
-    isSelected: Boolean,
-    showArrow:Boolean,// يحدد برمجياً هل هذا الصف هو المختار حالياً أم لا
-    onClick: () -> Unit       // الأكشن الذي ينطلق عند الضغط على الصف بالكامل
+fun GlowBackground(
+    modifier: Modifier = Modifier,
+    baseColor: Color,
+    glowColor1: Color,
+    glowColor2: Color,
+    designWidth: Float = 720f,
+    designHeight: Float = 1600f,
+    content: @Composable BoxScope.() -> Unit = {}
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() } // الكارد بالكامل أصبح قابل للنقر لتسهيل تجربة الاستخدام
-            .background(
-                // إذا تم اختياره، نعطيه خلفية بيضاء شفافة بنسبة 15% كمؤشر بصري، وإلا يظل شفافاً
-                color = if (isSelected) Color.White.copy(alpha = 0.15f) else Color.Transparent,
-                shape = RoundedCornerShape(9.dp)
-            )
-            .padding(vertical = 6.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(baseColor)
+            .drawWithCache {
+                // --- 1. حسابات التوهج الأول (Top Left Glow) ---
+                val glow1Width = size.width * (938f / designWidth)
+                val glow1Height = size.height * (1078f / designHeight)
+                val offsetX1 = size.width * (-287f / designWidth)
+                val offsetY1 = size.height * (-378f / designHeight)
+
+                val center1 = Offset(
+                    x = offsetX1 + (glow1Width * 0.6186f),
+                    y = offsetY1 + (glow1Height * 0.3892f)
+                )
+                val radius1 = glow1Width * 0.4772f
+
+                val brush1 = Brush.radialGradient(
+                    0.0f to glowColor1,
+                    0.38f to glowColor2,
+                    1.0f to Color.Transparent,
+                    center = center1,
+                    radius = radius1
+                )
+
+                // --- 2. حسابات التوهج الثاني (Bottom Right / Middle Glow) ---
+                val glow2Width = size.width * (938f / designWidth)
+                val glow2Height = size.height * (1078f / designHeight)
+                val offsetX2 = size.width * (-157f / designWidth)
+                val offsetY2 = size.height * (392f / designHeight)
+
+                val center2 = Offset(
+                    x = offsetX2 + (glow2Width * 0.6186f),
+                    y = offsetY2 + (glow2Height * 0.3892f)
+                )
+                val radius2 = glow2Width * 0.5772f
+
+                val brush2 = Brush.radialGradient(
+                    0.0f to glowColor1,
+                    0.38f to glowColor2,
+                    1.0f to Color.Transparent,
+                    center = center2,
+                    radius = radius2
+                )
+
+
+                onDrawBehind {
+                    // رسم Glow 1
+                    drawCircle(
+                        brush = brush1,
+                        center = center1,
+                        radius = radius1,
+                        blendMode = BlendMode.Overlay
+                    )
+
+                    // Glow
+                    drawCircle(
+                        brush = brush2,
+                        center = center2,
+                        radius = radius2,
+                        blendMode = BlendMode.Overlay
+                    )
+                }
+            }
     ) {
-        // 1. الأيقونة الخاصة بالحالة (Finish, Not Finish...)
-        Icon(
-            painter = painterResource(id = iconResId),
-            contentDescription = null,
-            tint = Color.Unspecified, // للحفاظ على ألوان الأيقونة الأصلية كما هي
-            modifier = Modifier
-                .width(61.dp)
-                .height(41.dp)
-                .padding(start = 8.dp)
-
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // 2. نص الحالة
-        Text(
-            text = title,
-            color = Color.White,
-            fontSize = 14.sp,
-            lineHeight = 11.sp,
-            modifier = Modifier.weight(1f),
-            fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-            fontWeight = FontWeight.Bold,
-        )
-
-        // 3. بديل الـ Checkbox: أيقونة "صح" تظهر فقط إذا كان هذا الصف هو المختار حالياً
-       if (isSelected) {
-        
-            Icon(
-                painter = painterResource(id = R.drawable.bottom_icon), // يمكنك استخدام أيقونة سهم أو صح متاحة لديكِ
-                contentDescription = "Selected Indicator",
-                tint = Color.White,
-                modifier = Modifier
-                    .padding(end = 12.dp)
-                    .size(16.dp)
-                    .graphicsLayer(alpha = if (showArrow) 1f else 0f)
-            )
-        } else {
-            // مساحة فارغة بديلة للحفاظ على محاذاة العناصر إذا لم يكن مختاراً
-            Spacer(modifier = Modifier.padding(end = 12.dp).size(16.dp))
-        }
-    }
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TaskCompletion( expectTime:Int) {
-    // 2️⃣ الـ States الناقصة للتحكم في الاختيارات والـ Bottom Sheet
-    var selectedStatus by remember { mutableStateOf<TaskResultStatus?>(null) }
-    var selectedExtraTime by remember { mutableStateOf<Int?>(null) }
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var selectedPsychologyReason by remember { mutableStateOf<String?>(null) }
-    val sheetState = rememberModalBottomSheetState()
-
-    BgScreen() // الخلفية الخاصة بكِ
-
-    // تم تصليح الـ Column وفتح القوس المظبوط {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(Modifier.height(50.dp))
-
-        // الـ Header المخصص بتاعكِ
-        ScreenHeader("ReadingSeationnnn", showEditButton = false)
-
-        Spacer(Modifier.height(50.dp))
-
-        // شارة الـ Time out البيضاء
-        Text(
-            text = "Time out",
-            modifier = Modifier
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
-                .background(color = Color.White, shape = RoundedCornerShape(20.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .wrapContentSize(),
-            color = Color(0xFFFF110D),
-            fontSize = 20.sp,
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
-            style = TextStyle(
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.Both
-                ),
-                fontWeight = FontWeight.Bold,
-                platformStyle = PlatformTextStyle(includeFontPadding = false)
-            )
-        )
-
-        Spacer(Modifier.height(40.dp))
-
-        // نص التايمر باصفار
-        Text(
-            text = "00:00",
-            color = Color.White,
-            fontSize = 32.sp,
-            letterSpacing = 1.sp,
-            lineHeight = 11.sp,
-            fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-            style = TextStyle(
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.Both
-                ),
-                fontWeight = FontWeight.Bold,
-                platformStyle = PlatformTextStyle(includeFontPadding = false)
-            )
-        )
-
-        Spacer(Modifier.height(60.dp))
-
-        // سؤال النص السفلي والـ Arrow icon
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Are you finish your Task ?",
-                modifier = Modifier.padding(start = 50.dp),
-                color = Color.White,
-                fontSize = 12.sp,
-                letterSpacing = 1.sp,
-                lineHeight = 11.sp,
-                fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-                style = TextStyle(
-                    lineHeightStyle = LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.Both
-                    ),
-                    fontWeight = FontWeight.Bold,
-                    platformStyle = PlatformTextStyle(includeFontPadding = false)
-                )
-            )
-
-            IconButton(
-                onClick = { /* العودة للخلف */ },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.bottom_icon),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.width(11.dp).height(20.dp)
-                )
-            }
-        }
-
-        Spacer(Modifier.height(10.dp))
-
-        // إعدادات الجراديانت الخاص بالكارد بتاعكِ
-        val startColor = Color(0xFF6347A4).copy(alpha = 0.2f)
-        val endColor = Color(0xFF000000).copy(alpha = 0.2f)
-        val gradientBrush = Brush.linearGradient(
-            colors = listOf(startColor, endColor),
-            start = Offset(0f, 0f),
-            end = Offset(Float.POSITIVE_INFINITY, 0f)
-        )
-
-        // كارد الخيارات الرئيسي
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .wrapContentHeight()
-                .background(brush = gradientBrush, shape = RoundedCornerShape(9.dp))
-                .padding(bottom = 24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-        ) {
-            Column(
-                modifier = Modifier.padding(top = 5.dp, start = 4.dp, end = 4.dp, bottom = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // 3️⃣ ربط الكروت ديناميكياً بالـ الـ الـ Single-Selection والـ Bottom Sheet
-                TaskResultStatus.values().forEach { status ->
-                    val iconRes = when(status) {
-                        TaskResultStatus.FINISH -> R.drawable.img_finish
-                        TaskResultStatus.FINISH_EXTRA -> R.drawable.img_finish_need_extra_time
-                        TaskResultStatus.NOT_FINISH -> R.drawable.img_finish
-                        TaskResultStatus.NOT_FINISH_EXTRA -> R.drawable.img_not_finish
-                    }
-
-                    RowCard(
-                        title = status.title,
-                        iconResId = iconRes,
-                        isSelected = selectedStatus == status,
-                        showArrow = (status != TaskResultStatus.FINISH),
-                        onClick = {
-                            if (status != TaskResultStatus.FINISH) {
-                                showBottomSheet = true
-                            } else {
-                                showBottomSheet = false // حماية عشان الستارة متفتحش لو كانت مفتوحة
-                            }
-                            selectedStatus = status
-                            selectedExtraTime = null // ريست للوقت القديم لو اختار حالة تانية
-                            selectedPsychologyReason = null
-                           // showBottomSheet = true  // افتح الستارة فوراً!
-                        }
-                    )
-                }
-            }
-        }
-    } // نهاية الـ Column الرئيسي
-
-    // 4️⃣ الـ Modal Bottom Sheet المفقود (الستارة اللي بتظهر من تحت)
-   // if (showBottomSheet && selectedStatus != null) {
-    if (showBottomSheet && selectedStatus != null && selectedStatus != TaskResultStatus.FINISH) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            sheetState = sheetState,
-            containerColor = Color(0xFF1C1B2B), // لون داكن متناسق مع تطبيقكِ
-            dragHandle = { BottomSheetDefaults.DragHandle(color = Color.White.copy(alpha = 0.4f)) }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // عرض السؤال المناسب للحالة المختارة
-                Text(
-                    text = selectedStatus?.getQuestion()?:"",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-
-
-                if (selectedStatus != TaskResultStatus.FINISH) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        selectedStatus!!.getPsychologyOptions().forEach { reason ->
-                            val isReasonSelected = selectedPsychologyReason == reason
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        color = if (isReasonSelected) Color(0xFF8C5BFF).copy(alpha = 0.2f) else Color.White.copy(
-                                            alpha = 0.05f
-                                        ),
-                                        shape = RoundedCornerShape(10.dp)
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        color = if (isReasonSelected) Color(0xFF8C5BFF) else Color.Transparent,
-                                        shape = RoundedCornerShape(10.dp)
-                                    )
-                                    .clickable { selectedPsychologyReason = reason }
-                                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                            ) {
-                                Text(
-                                    text = reason,
-                                    color = if (isReasonSelected) Color.White else Color.White.copy(
-                                        alpha = 0.7f
-                                    ),
-                                    fontSize = 13.sp,
-                                    fontWeight = if (isReasonSelected) FontWeight.Bold else FontWeight.Normal
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // عرض دوائر اختيار الدقائق
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.padding(bottom = 32.dp)
-                ) {
-                    selectedStatus!!.getDurationOptions(expectTime).forEach { minutes ->
-                        val isTimeSelected = selectedExtraTime == minutes
-
-                        Box(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .shadow(if (isTimeSelected) 4.dp else 0.dp, CircleShape)
-                                .background(
-                                    color = if (isTimeSelected) Color(0xFF8C5BFF) else Color.White.copy(alpha = 0.1f),
-                                    shape = CircleShape
-                                )
-                                .clickable { selectedExtraTime = minutes },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "+$minutes\nm",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
-
-                val isConfirmEnabled = if (selectedStatus == TaskResultStatus.FINISH) {
-                    selectedExtraTime != null
-                } else {
-                    selectedExtraTime != null && selectedPsychologyReason != null
-                }
-
-                // زرار التأكيد النهائي
-                //
-                // للـ Bottom Sheet
-                Button(
-                    onClick = {
-                        showBottomSheet = false
-
-                        // TODO: هنا أرسلي الـ `selectedStatus` والـ `selectedExtraTime` للـ ViewModel
-                    },
-                   // enabled = selectedExtraTime != null, // لا ينقر إلا بعد تحديد الوقت
-                    enabled = isConfirmEnabled,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text("Confirm Selection", fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-    }
-}
-/*
-@Composable
-fun TaskCompletion() {
-
-    BgScreen()
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        )
-
-        {
-
-            Spacer(Modifier.height(50.dp))
-
-            ScreenHeader("ReadingSeationnnn", showEditButton = false)
-
-            Spacer(Modifier.height(50.dp))
-
-            /*   Text(
-                text = "Time out",
-                color = Color.Red, // اللون الأحمر كما في الصورة
-                style = TextStyle(
-                    fontFamily = FontFamily.SansSerif, // أو الخط الذي تستخدمينه
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    platformStyle = PlatformTextStyle(includeFontPadding = false),
-
-
-                )
-            )*/
-
-
-               /* Surface(
-                    modifier = Modifier
-                        .wrapContentSize(),
-
-                    // 260 / 2
-                       // .height(36.dp), // 73 / 2
-                    shape = CircleShape, // لجعل الحواف دائرية تماماً مثل الصورة
-                    color = Color.White, // الخلفية البيضاء كما في السكرين
-                    shadowElevation = 4.dp // إضافة ظل خفيف ليعطي عمق للزر فوق الخلفية البنفسجية
-                ) {*/
-
-
-                  /*  Box(
-                        contentAlignment = Alignment.Center,
-                        //color = Color.White,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {*/
-                        Text(
-                            text = "Time out",
-                            modifier = Modifier
-                          //  .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
-                        // 2. الخلفية البيضاء مع الشكل
-                        .background(color = Color.White, shape = RoundedCornerShape(20.dp))
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                           // color = Color(0xFFFF110D), //CircleShape, // لجعل الحواف دائرية تماماً مثل الصورة
-                        .wrapContentSize(),
-
-                            color = Color(0xFFFF110D),
-                            fontSize = 20.sp,
-                            fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                            style = TextStyle(
-                                lineHeightStyle = LineHeightStyle(
-                                    alignment = LineHeightStyle.Alignment.Center,
-                                    trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
-                                ),
-                                fontWeight = FontWeight.Bold,
-                                platformStyle = PlatformTextStyle(includeFontPadding = false) // يضمن توسيطاً دقيقاً
-                            )
-
-                        )
-                   // }
-               // }
-            Spacer(Modifier.height(40.dp))
-            Text(
-                text = "00:00",
-                //modifier = Modifier
-                color = Color.White,
-                fontSize = 32.sp,
-                letterSpacing = 1.sp,
-                lineHeight = 11.sp,
-
-                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-                style = TextStyle(
-                    lineHeightStyle = LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
-                    ),
-                    fontWeight = FontWeight.Bold,
-
-                    platformStyle = PlatformTextStyle(includeFontPadding = false) // يضمن توسيطاً دقيقاً
-                )
-
-            )
-          Spacer(Modifier.height(60.dp))
-            Row(
-
-                verticalAlignment = Alignment.CenterVertically,
-
-                ) {
-                Text(
-                    text = "Are you finish your Task ?",
-                      Modifier.padding(start =50.dp),
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    letterSpacing = 1.sp,
-                    lineHeight = 11.sp,
-
-                    fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-                    style = TextStyle(
-
-                        lineHeightStyle = LineHeightStyle(
-                            alignment = LineHeightStyle.Alignment.Center,
-                            trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
-                        ),
-                        fontWeight = FontWeight.Bold,
-
-                        platformStyle = PlatformTextStyle(includeFontPadding = false) // يضمن توسيطاً دقيقاً
-                    )
-
-                )
-
-                IconButton(
-                    onClick = { /* العودة للخلف */ },
-
-                    modifier = Modifier.size(48.dp)
-                ) {
-
-                    Icon(
-                        painter = painterResource(id = R.drawable.bottom_icon),
-                        contentDescription = null,
-
-                        tint = Color.White,
-
-                        modifier = Modifier.width(11.dp).height(20.dp)
-
-                    )
-                }
-
-            }//endRowAre
-          Spacer(Modifier.height(10.dp))
-
-            // 1. تعريف الألوان مع الشفافية (0.2 alpha تعادل 20% opacity)
-            val startColor = Color(0xFF6347A4).copy(alpha = 0.2f)
-            val endColor = Color(0xFF000000).copy(alpha = 0.2f)
-
-// 2. إنشاء التدرج (90 درجة تعادل تدرج أفقي من اليسار لليمين)
-            val gradientBrush = Brush.linearGradient(
-                colors = listOf(startColor, endColor),
-                start = Offset(0f, 0f),
-                end = Offset(Float.POSITIVE_INFINITY, 0f) // يمتد لنهاية العرض أفقياً
-            )
-            Card(
-                modifier = Modifier
-                    .background(basePurple)
-                    .fillMaxWidth(0.8f) // تأخذ 90% من عرض أي شاشة
-                    .wrapContentHeight()
-
-                    .background(brush = gradientBrush, shape = RoundedCornerShape(9.dp))
-                    // ملاحظة: الـ top و left في فيجما يتم ترجمتهما عادةً كـ Padding أو كجزء من ترتيب العناصر في الـ Column/Row
-                    //.padding( start = 2.dp,top =5.dp),
-                .padding(bottom = 24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.Transparent // إزالة اللون الافتراضي نهائياً
-                ),
-              /*  border = BorderStroke(
-                    width = 0.5.dp, // 1px / 2
-                    color = Color(0xFFAD8AFF).copy(alpha = 0.18f) // تحويل الشفافية 2E إلى حوالي 0.18f
-                )*/
-               // border = BorderStroke(0.5.dp, Color(0xFF6347A4)),//.copy(alpha = 0.5f)) // 1px / 2 مع شفافية بسيطة
-            ) {
-                Column(
-                    modifier = Modifier
-                        // .wrapContentHeight()
-                        .padding(top = 5.dp), // مسافة داخلية لتنظيم العناصر
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-
-                    // هنا تضعين صفوف الـ Checkbox (Finish, Not Finish...)
-
-                    RowCard("Finish",R.drawable.img_finish)
-                    RowCard("Finish-(Need extra time)",R.drawable.img_finish_need_extra_time)
-                    RowCard("Not Finish",R.drawable.img_finish)
-                    RowCard("Not Finish-(Need extra time)",R.drawable.img_not_finish)
-
-
-                   /* Checkbox(
-
-                        checked = isChecked,
-                        onCheckedChange = { isChecked = it },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = Color.White,       // اللون عند الاختيار
-                            uncheckedColor = Color.LightGray  // اللون عند عدم الاختيار
-                        )
-                    )*/
-
-                }//////end colum card
-            }
-            }//end colum
-        }*/
-
-/*
-@Composable
-fun ScreenHeader() {
-    Row(
-
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .statusBarsPadding(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
-
-    ) {
-
-        IconButton(
-            onClick = { /* العودة للخلف */ },
-
-            modifier = Modifier.size(48.dp) // مساحة النقر القانونية
-        ) {
-
-            Icon(
-                painter = painterResource(id = R.drawable.back_arrow),
-                contentDescription = null,
-                tint = Color.White,
-
-                modifier = Modifier.size(22.dp)
-
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = "Reading seassruio",
-            color = Color.White,
-            fontSize = 20.sp,
-            modifier = Modifier.weight(1f),
-
-            style = TextStyle(
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
-                ),
-                fontWeight = Black,// FontWeight(860),
-//                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-//
-//                )
-//
-//
-//        )
-//    }
-//}*/
-
-@Composable
-fun TodayOverviewCard(state: TaskUiState) {
-
-    Column(Modifier.padding(start = 14.dp, end = 14.dp)) {
-        Text(
-            text = "Today’s Overview",
-            Modifier.padding(start = 22.dp, top = 11.dp),
-            color = Color.White,
-
-
-            style = TextStyle(
-
-                fontFamily = FontFamily(Font(R.font.sfpro_semibold)), // استبدليها باسم ملف الخط لديكِ
-                fontWeight = FontWeight(590), // أو FontWeight.SemiBold
-                fontSize = 16.sp,
-                lineHeight = 11.sp, // ملاحظة هامة بالأسفل حول هذه القيمة
-                letterSpacing = 0.sp,
-
-
-                )
-        )
-
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 30.dp),
-            //  .padding(vertical = 30.dp, horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp) // Gap بين الأيقونة والنص
-        ) {
-
-            IconButton(
-                onClick = { /* العودة للخلف */ },
-                modifier = Modifier.size(48.dp) // مساحة النقر المثالية
-            ) {
-
-                // الأيقونة الدائرية
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // 1. الأيقونة الخلفية (الدائرة)
-                    Icon(
-                        painter = painterResource(id = R.drawable.crcular_icon_container),
-                        contentDescription = null,
-                        tint = Color(0xFF7446DE),
-                        //tint = Color.White.copy(alpha = 0.2f), // شفافية الدائرة كما في التصميم
-                        modifier = Modifier.size(30.dp) // حجم الدائرة الخارجية
-                    )
-
-                    // 2. الأيقونة الأمامية (السهم أو الـ Check)
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_inside_circle_left), // أيقونة السهم مثلاً
-                        contentDescription = null,
-                        tint = Color(0xFF7446DE),
-                        modifier = Modifier.size(10.dp) // حجم الأيقونة الداخلية (أصغر من الدائرة)
-                    )
-                }
-            }
-
-            Column {
-                Text(
-                    text = state.sessionCount.toString(),
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.sfpro_semibold)),
-                    color = Color.White
-                )
-                Text(
-                    text = "work session done",
-                    fontSize = 8.sp,
-                    fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-                    color = Color.White.copy(alpha = 0.6f)
-                )
-            }
-        }//endrow
-
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp) // Gap بين الأيقونة والنص
-        ) {
-
-            IconButton(
-                onClick = { /* العودة للخلف */ },
-                modifier = Modifier.size(48.dp) // مساحة النقر المثالية
-            ) {
-
-                // الأيقونة الدائرية
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // 1. الأيقونة الخلفية (الدائرة)
-                    Icon(
-                        painter = painterResource(id = R.drawable.crcular_icon_container),
-                        contentDescription = null,
-                        tint = Color(0xFF7446DE),
-                        //tint = Color.White.copy(alpha = 0.2f), // شفافية الدائرة كما في التصميم
-                        modifier = Modifier.size(30.dp) // حجم الدائرة الخارجية
-                    )
-
-                    // 2. الأيقونة الأمامية (السهم أو الـ Check)
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_inside_right), // أيقونة السهم مثلاً
-                        contentDescription = null,
-                        tint = Color(0xFF7446DE),
-                        modifier = Modifier.size(10.dp) // حجم الأيقونة الداخلية (أصغر من الدائرة)
-                    )
-                }
-            }
-
-
-            Column {
-                Text(
-                    text = "${state.totalMinutesToday}m ${state.totalSecondsToday}s",//"2h 84m",
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.sfpro_semibold)),
-                    color = Color.White
-                )
-                Text(
-                    text = "Foucs Time",
-                    fontSize = 8.sp,
-                    fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-                    color = Color.White.copy(alpha = 0.6f)
-                )
-            }
-
-        }//endrow
 
     }
 }
 
 
-
-
 @Composable
-fun TaskRow(titleTask: String = "",displayTime:String = "") {
-
-
+fun TimeoutBadge(
+    text: String = "Time out",
+    modifier: Modifier = Modifier
+) {
     Text(
-
-        text = titleTask,
-        color = Color.White,
-
-
+        text = text,
+        modifier = modifier
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
+            .background(color = Color.White, shape = RoundedCornerShape(20.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .wrapContentSize(),
+        color = Color(0xFFFF110D),
+        fontSize = 20.sp,
+        fontFamily = FontFamily(Font(R.font.inter_semibold)),
         style = TextStyle(
-
-            fontFamily = FontFamily(Font(R.font.sfpro_semibold)), // استبدليها باسم ملف الخط لديكِ
-            fontWeight = FontWeight(590), // أو FontWeight.SemiBold
-            fontSize = 14.sp,
-            lineHeight = 11.sp, // ملاحظة هامة بالأسفل حول هذه القيمة
-            letterSpacing = 0.sp,
-
-            //textAlign = TextAlign.Center
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Center,
+                trim = LineHeightStyle.Trim.Both
+            ),
+            fontWeight = FontWeight.Bold,
+            platformStyle = PlatformTextStyle(includeFontPadding = false)
         )
     )
+}
 
 
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp))//Modifier.fillMaxHeight(),
-
-    {
-        Text(
-           text = displayTime,
-            color = Color(0xFFA9A7A7),
-
-
-            style = TextStyle(
-
-                fontFamily = FontFamily(Font(R.font.sfpro_medium)), // استبدليها باسم ملف الخط لديكِ
-                fontWeight = FontWeight(590), // أو FontWeight.SemiBold
-                fontSize = 12.sp,
-                lineHeight = 11.sp, // ملاحظة هامة بالأسفل حول هذه القيمة
-                letterSpacing = 0.sp,
-
-                //textAlign = TextAlign.Center
-            )
+@Composable
+fun ZeroTimerText(
+    timeText: String = "00:00",
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = timeText,
+        modifier = modifier,
+        color = Color.White,
+        fontSize = 32.sp,
+        letterSpacing = 1.sp,
+        lineHeight = 11.sp,
+        fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+        style = TextStyle(
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Center,
+                trim = LineHeightStyle.Trim.Both
+            ),
+            fontWeight = FontWeight.Bold,
+            platformStyle = PlatformTextStyle(includeFontPadding = false)
         )
-
-        Box(
-
-        ) {
-            // 1. الأيقونة الخلفية (الدائرة)
-            Icon(
-                painter = painterResource(id = R.drawable.retry_icon),
-                contentDescription = null,
-                tint = Color.White,
-                //tint = Color.White.copy(alpha = 0.2f), // شفافية الدائرة كما في التصميم
-                modifier = Modifier.size(31.dp) // حجم الدائرة الخارجية
-            )
-
-        }
-
-    }
-
-}
-
-
-
-@Composable
-fun TaskRoute(
-    viewModel: TaskViewModel /*TaskOverviewViewModel */= viewModel(),
-            viewModelOverView: TaskOverviewViewModel = viewModel()
-
-) {
-
-    val state by viewModel.uiState.collectAsState()
-    val stateOverView by viewModelOverView.state.collectAsState()
-
-
-
-    DailyOverviewScreen (state,stateOverView)
-
+    )
 }
 
 
 @Composable
-fun EndSessionDialog(
+fun EditTaskTitleDialog(
+    currentTitle: String = "",
     onDismiss: () -> Unit,
-    onConfirmFinish: () -> Unit,
-    onConfirmGiveUp: () -> Unit
-) {
+    onConfirm: (String) -> Unit,
+
+    ) {
+    var updatedTitle by remember { mutableStateOf(currentTitle) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Are you done with your task?",
-                fontSize = 18.sp,
-                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-                color = Color.White
+        title = { Text(text = "Edit Task Title", fontWeight = FontWeight.Bold) },
+        text = {
+            OutlinedTextField(
+                value = updatedTitle,
+                onValueChange = { updatedTitle = it },
+                label = { Text("Title") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
         },
-        containerColor = Color(0xFF200C4E), // متناسق مع ثيم تطبيقك الداكن
         confirmButton = {
-
-            TextButton(onClick = onConfirmFinish) {
-                Text(
-                    text = "🟢 Yes, I finished it!",
-                    color = Color(0xFF4CAF50), // أخضر مريح
-                    fontFamily = FontFamily(Font(R.font.sfpro_semibold))
-                )
+            TextButton(
+                onClick = {
+                    if (updatedTitle.isNotBlank()) {
+                        onConfirm(updatedTitle)
+                    }
+                }
+            ) {
+                Text("Save")
             }
         },
         dismissButton = {
-
-            TextButton(onClick = onConfirmGiveUp) {
-                Text(
-                    text = "🔴 No, I'm giving up",
-                    color = Color(0xFFFF5252), // أحمر ناعم ومريح
-                    fontFamily = FontFamily(Font(R.font.sfpro_semibold))
-                )
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
             }
         }
     )
 }
 
-
-@Composable
-fun ScoreTaskTimer( state: TimerState,
-                      onIntent: (TimerIntent) -> Unit,
-                   ) {
-
-
-    Box(modifier = Modifier.fillMaxSize().background(basePurple)) {}
-    Box(
-        modifier = Modifier
-
-            .fillMaxSize()
-            .background(basePurple)
-            .drawWithCache {
-                // الأبعاد الأصلية التي أعطيتِني إياها (Frame Size)
-                val designWidth = 720f
-                val designHeight = 1600f
-
-                // 1. حساب الأبعاد الحقيقية بناءً على شاشة المستخدم الحالية
-                val glowWidth = size.width * (938f / designWidth)
-                val glowHeight = size.height * (1078f / designHeight)
-
-
-
-                // 2. حساب الإزاحة (Offsets) بدقة
-                val offsetX = size.width * (177f / designWidth)
-                val offsetY = size.height * (509f / designHeight)
-
-                onDrawBehind {
-                    // رسم المستطيل الذي يحمل التوهج
-                    drawOval(
-                        brush = Brush.radialGradient(
-                            0.0f to color1,
-                            0.38f to color2,
-                            // 0.85f to Color(0xFF6943AC).copy(alpha = 0.24f), // هنا نضع الـ 24% الخاصة بفيجما
-                            1.0f to Color.Transparent,
-
-                            center = Offset(
-                                // نسلتها اد ايه
-                                x =  offsetX+(glowWidth * 0.6186f),
-                                y = offsetY+ (glowHeight * 0.3892f)
-                            ),
-                            // مدي اتشارها
-                            radius = glowWidth * 0.5772f
-
-
-                        ),
-                        // هبدا رسم منين
-                        topLeft = Offset(offsetX, offsetY),
-                        // حجمها اد ايه
-                        size = Size(glowWidth, glowHeight),
-                        // تطبيق الشفافية الكلية (0.4) ووضع الدمج
-                        //   alpha = 0.2f,
-                        blendMode = BlendMode.Overlay
-                    )
-                }
-
-            }.blur(
-                radius = 81.dp,
-                edgeTreatment = BlurredEdgeTreatment.Unbounded
-            )
-    )
-    Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally)
-
-    {
-
-        Spacer(Modifier.height(50.dp))
-
-        ScreenHeader("ReadingSeationnnn", showEditButton = true)
-
-        Spacer(modifier = Modifier.height(110.dp))
-
-        // progress من 1.0 (بداية) إلى 0.0 (نهاية)
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(146.dp)
-            //.fillMaxSize()
-            // .background(Color(0xFF4A2997))
-        ) {
-
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val strokeWidth = 8.dp.toPx() // استنتاج السمك بالنظر
-
-                // 1. الدائرة البيضاء (الخلفية الشفافة 20%)
-                drawCircle(
-                    Color(0xFF7F69B3).copy(alpha = 0.5f),
-                   // color = Color(0xFFE4D8FF).copy(alpha = 0.2f),
-                    // brush = Brush.linearGradient(colorStops = scoreTaskTimerStops),
-
-                    style = Stroke(width = strokeWidth)
-                )
-
-                // 2. القوس الأسود (التقدم)
-                drawArc(
-                    // brush = Brush.linearGradient(colorStops = scoreTaskTimerStops),
-                    color =  Color(0xFF200C4E),//Color.Black,
-                    startAngle = -90f,
-                    sweepAngle = state.value * 360f,//360f * progress,
-                    useCenter = false,
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                )
-            }
-
-            Text(
-                text = state.formattedTime,//(currentTime / 1000L).toString(), //"45:00",
-                style = TextStyle(
-                    fontWeight = Black,
-                    lineHeight = 11.sp,
-                    letterSpacing = 1.sp,// FontWeight(860),
-                    fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-
-                    ),
-                color = Color.White, fontSize = 32.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(80.dp))
-        Row(
-
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-
-            IconButton(
-                onClick = {
-                    if (state.isRunning) {
-                        onIntent(TimerIntent.PauseTimer(state.idTask))
-                    }else{
-                        onIntent(TimerIntent.StartTimer(state.idTask,state.totalTime))
-
-                    }
-                },
-                modifier = Modifier.size(41.dp)
-            ) {
-                Icon(
-                    painter = painterResource(
-                        id = if (state.isRunning) R.drawable.pause_icon else R.drawable.icon_play
-                    ),
-                   // painter = painterResource(id = R.drawable.icon_play),
-                    contentDescription = "Start Timer",
-                    tint = Color.Unspecified, // أو أي لون يتماشى مع الثيم الخاص بكِ
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-
-            Spacer(modifier = Modifier.width(80.dp))
-
-
-            IconButton(
-                onClick = {
-                    onIntent(TimerIntent.ResetTimer(state.idTask))
-                },
-                modifier = Modifier.size(41.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.retry_icon),
-                    contentDescription = "Reset Timer",
-                    tint = Color.Unspecified, // أو أي لون يتماشى مع الثيم الخاص بكِ
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-
-        }
-        Spacer(Modifier.height(70.dp))
-
-        OutlinedButton(
-            onClick = {
-                onIntent(TimerIntent.EndSessionClicked)
-
-            },
-            border = BorderStroke(1.dp, Color(0xFFFF2521).copy(alpha = 0.7f)), // إطار أحمر خفيف
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF2521)) // نص أحمر
-        ) {
-            Text(text = "End Session", color = Color.White)
-    }
-
-        if (state.showEndSessionDialog) {
-            EndSessionDialog(
-                onDismiss = { onIntent(TimerIntent.DismissDialog) },
-                onConfirmFinish = { onIntent(TimerIntent.ConfirmFinishEarly) },
-                onConfirmGiveUp = { onIntent(TimerIntent.ConfirmGiveUp) }
-            )
-        }
-        /*Button(
-            onClick = {
-                // هنا نرسل الـ Intent لفتح الـ Dialog أو معالجة الإنهاء المبكر
-                //onIntent(TimerIntent.EndSessionClicked(state.idTask))
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFE53935) // لون أحمر هادئ يعبر عن الإنهاء والتوقف
-            ),
-            shape = RoundedCornerShape(40.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = "End Session",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.sfpro_semibold))
-            )
-        }*/
-    }
-
-
-}
-
-
-
-
-
-
-
-
-
-@Composable
-fun DailyOverviewScreen( state: TaskUiState,stateOverView: TaskUiState) {
-    BgScreen()
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    )
-
-    {
-
-        Spacer(Modifier.height(50.dp))
-
-        ScreenHeader("MyProductivty",R.drawable.back_arrow)
-
-        Spacer(Modifier.height(50.dp))
-
-
-        ///////////
-        val backgroundGradient = Brush.linearGradient(
-            0.0f to Color(0xFF6347A4).copy(alpha = 0.2f), // بداية التدرج
-            0.80f to Color(0xFF000000).copy(alpha = 0.2f), // نهاية التدرج
-            start = Offset(0f, 0f),
-            end = Offset(Float.POSITIVE_INFINITY, 0f) // لضمان اتجاه 90 درجة (أفقي)
-        )
-
-        Box(
-            modifier = Modifier
-                // 2. جعل العرض متجاوباً (يأخذ 90% من عرض الشاشة) بدلاً من width: 578
-                .fillMaxWidth(0.90f)
-
-                // 3. الارتفاع المرن (بين حد أدنى وأقصى) بدلاً من height: 332
-                .heightIn(min = 200.dp, max = 350.dp)
-                .border(
-                    width = 1.dp,
-                    color = Color.White.copy(alpha = 0.1f), // إطار خفيف جداً لإعطاء تأثير الزجاج
-                    shape = RoundedCornerShape(8.dp)
-                )
-                // 4. تطبيق الخلفية والزوايا
-                .clip(RoundedCornerShape(17.dp)) // border-radius: 17px
-                .background(backgroundGradient),
-
-            ) {
-
-            TodayOverviewCard(stateOverView)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 16.dp, top = 46.dp), // أو fillMaxSize حسب حاجتك
-                horizontalArrangement = Arrangement.End // لتوسيط العناصر أفقياً
-            ) //) {
-            {
-                TimeMuscleProgressIndicator(stateOverView)
-
-            }
-
-        }
-
-        Spacer(Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp),
-            horizontalArrangement = Arrangement.SpaceBetween, // دفع العناصر للأطراف
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Text(
-                text = "TimeLine",
-                color = Color.White,
-
-
-                style = TextStyle(
-
-                    fontFamily = FontFamily(Font(R.font.sfpro_semibold)), // استبدليها باسم ملف الخط لديكِ
-                    fontWeight = FontWeight(590), // أو FontWeight.SemiBold
-                    fontSize = 16.sp,
-                    lineHeight = 11.sp, // ملاحظة هامة بالأسفل حول هذه القيمة
-                    letterSpacing = 0.sp,
-
-
-                    )
-            )
-
-
-            Text(
-                text = "Today",
-                color = Color(0xFFA9A7A7),
-
-
-                style = TextStyle(
-
-                    fontFamily = FontFamily(Font(R.font.sfpro_medium)), // استبدليها باسم ملف الخط لديكِ
-                    fontWeight = FontWeight(590), // أو FontWeight.SemiBold
-                    fontSize = 16.sp,
-                    lineHeight = 11.sp, // ملاحظة هامة بالأسفل حول هذه القيمة
-                    letterSpacing = 0.sp,
-
-                    )
-            )
-        }
-
-        Spacer(Modifier.height(20.dp))
-        //card
-
-        val cardGradient = Brush.linearGradient(
-            0.0f to Color(0xFF6347A4).copy(alpha = 0.2f),
-            0.8f to Color(0x00000000).copy(alpha = 0.2f),
-            start = Offset(0f, 0f),
-            end = Offset(Float.POSITIVE_INFINITY, 0f)
-        )
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp), // مسافة في أعلى وأسفل القائمة بالكامل
-            verticalArrangement = Arrangement.spacedBy(12.dp) // 💡 تصنع مسافة تلقائية بمقدار 12dp بين كل كارد والآخر
-        ) {
-
-            items(state.tasksList) { task ->
-
-                // 2. الـ OutlinedCard الآن أصبحت داخل الـ items لتتكرر مع كل عنصر
-                OutlinedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 110.dp)
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(17.dp),
-                    border = BorderStroke(1.dp, Color(0x2EAD8AFF)),
-                    colors = CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
-                ) {
-
-                    // 3. محتويات الكارد من الداخل
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        // استدعاء تصميم السطر الخاص بكِ وتمرير بيانات الـ task الحالية له
-                        TaskRow(
-                            titleTask = task.title,
-                            displayTime = "${task.totalMinutes} minutes"
-                        )
-
-                    }
-
-                }
-
-        }
-
-
-
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-@Composable
-fun StateCart(
-    value: String,
-    title: String,
-    iconInside: Int, // نمرر الـ Resource ID للأيقونة الداخلية
-    cardGradient: Brush,
-    weight: Float
-    // modifier: Modifier = Modifier
-) {
-
-    Card(
-        modifier = Modifier
-            //.weight(1f)
-
-
-            //.fillMaxWidth(0.4f) // تأخذ 90% من عرض الشاشة مهما كان حجمها
-            // حذفنا الـ height(69.5.dp) الثابت لنجعلها مرنة
-            .heightIn(min = 80.dp) // حد أدنى للارتفاع (139/2) لتجنب الانكماش الشديد
-            // .padding(end = 16.dp)
-            .background(
-                brush = cardGradient,
-                shape = RoundedCornerShape(8.dp) // الزوايا الدائرية
-            )
-            .border(
-                width = 1.dp,
-                color = Color.White.copy(alpha = 0.1f), // إطار خفيف جداً لإعطاء تأثير الزجاج
-                shape = RoundedCornerShape(8.dp)
-            ),
-
-        shape = RoundedCornerShape(8.dp),
-
-        // مسافة خارجية عن حواف الشاشة
-
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-        //border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.2f))
-    ) {
-////
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-
-                .padding(vertical = 20.dp, horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp) // Gap بين الأيقونة والنص
-        ) {
-
-            IconButton(
-                onClick = { /* العودة للخلف */ },
-                modifier = Modifier.size(48.dp) // مساحة النقر المثالية
-            ) {
-
-                // الأيقونة الدائرية
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // 1. الأيقونة الخلفية (الدائرة)
-                    Icon(
-                        painter = painterResource(id = R.drawable.crcular_icon_container),
-                        contentDescription = null,
-                        tint = Color(0xFF7446DE),
-                        //tint = Color.White.copy(alpha = 0.2f), // شفافية الدائرة كما في التصميم
-                        modifier = Modifier.size(30.dp) // حجم الدائرة الخارجية
-                    )
-
-                    // 2. الأيقونة الأمامية (السهم أو الـ Check)
-                    Icon(
-                        painter = painterResource(id = iconInside), // أيقونة السهم مثلاً
-                        contentDescription = null,
-                        tint = Color(0xFF7446DE),
-                        modifier = Modifier.size(10.dp) // حجم الأيقونة الداخلية (أصغر من الدائرة)
-                    )
-                }
-            }
-            Column {
-                Text(
-                    text = value,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.sfpro_semibold)),
-                    color = Color.White
-                )
-                Text(
-                    text = title,
-                    fontSize = 6.sp,
-                    fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-                    color = Color.White.copy(alpha = 0.6f)
-                )
-            }
-
-        }
-
-
-    }
-}
-
-
-
-@Composable
-fun DashboardScreenRoute(viewModel: StatsViewModel){
-
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-
-    DashboardScreen(
-        state = state,
-        onIntent = viewModel::onIntent
-    )
-
-
-}
-
-@Composable
-fun DashboardScreen(
-    state: StatsState,
-      onIntent: (StateIntent) -> Unit
-
-) {
-
-    BgScreen()
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    )
-
-    {
-
-        Spacer(Modifier.height(50.dp))
-        ScreenHeader("MySccore",R.drawable.back_arrow)
-        Spacer(Modifier.height(50.dp))
-        val cardGradient = Brush.linearGradient(
-            0.0f to Color(0xFF6347A4).copy(alpha = 0.2f), // البداية (تقريباً -6.66%)
-            0.8f to Color(0xFF000000).copy(alpha = 0.2f), // النهاية عند 80.77%
-            start = Offset(0f, 0f),
-            end = Offset(Float.POSITIVE_INFINITY, 0f) // لضمان الاتجاه الأفقي (90 درجة)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),//35
-            horizontalArrangement = Arrangement.spacedBy(30.dp) //30 المسافة بين البطاقتين
-        ) {
-
-            Box(modifier = Modifier.weight(1f)) {
-                StateCart(
-                    value ="${state.totalSessionCount}", //"12",
-                    title = "Total Tasks Completed",
-                    iconInside = R.drawable.icon_inside_circle_left,
-                    cardGradient = cardGradient,
-                    weight = 1f
-                )
-            }
-
-            Box(modifier = Modifier.weight(1f)) {
-                StateCart(
-                    "${state.totalFocusTimeMinutes}m ${state.totalFocusTimeSeconds}s",
-                    //"5h 49m",
-                    "Total Foucs Time",
-                    R.drawable.icon_inside_right,
-                    cardGradient = cardGradient,
-                    weight = 1f
-                )
-            }
-
-        }
-
-        Spacer(Modifier.height(50.dp))
-        CustomTabRow(
-            selectedTab = state.selectedTab,
-            onTabSelected = { newIndex ->
-                onIntent(StateIntent.ChangeTab(newIndex))
-            })
-        Spacer(Modifier.height(30.dp))
-
-        Text(
-            text = "Activity",
-            color = Color.White,
-            fontSize = 16.sp,
-            lineHeight = 11.sp,
-
-            //  modifier = Modifier.weight(1f),
-
-            style = TextStyle(
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.Both // قص أي مسافات إضافية
-                ),
-                fontWeight = Black,// FontWeight(860),
-                fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-
-                )
-
-
-        )
-        Spacer(Modifier.height(20.dp))
-        Box(
-            modifier = Modifier
-                // 1. جعل العرض متجاوباً (يأخذ 90% من عرض الشاشة)
-                .fillMaxWidth(0.90f)
-
-                // 2. الارتفاع يتحدد بناءً على المحتوى أو نسبة معينة
-                .heightIn(min = 160.dp, max = 200.dp)
-
-                // .padding(top=16.dp)
-                .clip(RoundedCornerShape(17.dp)) // border-radius: 17px
-                .background(
-                    // التدرج اللوني الذي طلبتِيه مع الشفافية
-                    Brush.linearGradient(
-                        0.0f to Color(0xFF6347A4).copy(alpha = 0.2f),
-                        0.8f to Color(0xFF000000).copy(alpha = 0.2f),
-                        start = Offset(0f, 0f),
-                        end = Offset(Float.POSITIVE_INFINITY, 0f)
-                    )
-                )
-                .border(
-                    width = 1.dp,
-                    color = Color.White.copy(alpha = 0.1f), // إطار خفيف جداً لإعطاء تأثير الزجاج
-                    shape = RoundedCornerShape(17.dp)
-                )
-        ) {
-            SimpleVicoChart(
-                points = state.chartPoints,
-                selectedTab = state.selectedTab
-
-
-            )
-        }
-
-    }
-}
-/*
-@Composable
-fun OnBoardingBackground(
-    modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
-) {
-
-
-    Box(
-
-        modifier = Modifier
-
-            .fillMaxSize()
-            .background(basePurple)
-            .drawWithCache {
-                // الأبعاد الأصلية التي أعطيتِني إياها (Frame Size)
-                val designWidth = 720f
-                val designHeight = 1600f
-
-                // 1. حساب الأبعاد الحقيقية بناءً على شاشة المستخدم الحالية
-                val glowWidth = size.width * (630f / designWidth)
-                val glowHeight = size.height * (630f / designHeight)
-
-
-                // 2. حساب الإزاحة (Offsets) بدقة
-                val offsetX = size.width * (217f / designWidth)
-                val offsetY = size.height * (-384f / designHeight)
-
-                onDrawBehind {
-                    // رسم المستطيل الذي يحمل التوهج
-                    drawOval(
-                        brush = Brush.radialGradient(
-                            0.0f to color1,
-                            0.38f to color2,
-                            // 0.85f to Color(0xFF6943AC).copy(alpha = 0.24f), // هنا نضع الـ 24% الخاصة بفيجما
-                            1.0f to Color.Transparent,
-
-                            center = Offset(
-                                // نسلتها اد ايه
-                                x = offsetX + (glowWidth * 0.6186f),
-                                y = offsetY + (glowHeight * 0.3892f)
-                            ),
-                            // مدي اتشارها
-                            radius = glowWidth * 0.5772f
-
-
-                        ),
-                        // هبدا رسم منين
-                        topLeft = Offset(offsetX, offsetY),
-                        // حجمها اد ايه
-                        size = Size(glowWidth, glowHeight),
-                        // تطبيق الشفافية الكلية (0.4) ووضع الدمج
-                        //   alpha = 0.2f,
-                        blendMode = BlendMode.Overlay
-                    )
-                }
-
-            }
-            .blur(
-                radius = 81.dp,
-                edgeTreatment = BlurredEdgeTreatment.Unbounded
-            )
-
-
-            .drawWithCache {
-                // الأبعاد الأصلية التي أعطيتِني إياها (Frame Size)
-                val designWidth = 720f
-                val designHeight = 1600f
-
-                // 1. حساب الأبعاد الحقيقية بناءً على شاشة المستخدم الحالية
-                val glowWidth = size.width * (630f / designWidth)
-                val glowHeight = size.height * (630f / designHeight)
-
-
-                // 2. حساب الإزاحة (Offsets) بدقة
-                val offsetX = size.width * (14f / designWidth)
-                val offsetY = size.height * (326f / designHeight)
-
-                onDrawBehind {
-                    // رسم المستطيل الذي يحمل التوهج
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            0.0f to color1,
-                            0.38f to color2,
-                            1.0f to Color.Transparent,
-
-                            center = Offset(
-                                // نسلتها اد ايه
-                                x = offsetX + (glowWidth * 0.6186f),
-                                y = offsetY + (glowHeight * 0.3892f)
-                            ),
-                            // مدي اتشارها
-                            radius = glowWidth * 0.4772f
-
-
-                        ),
-                        center = Offset(
-                            // نسلتها اد ايه
-                            x = offsetX + (glowWidth * 0.6186f),
-                            y = offsetY + (glowHeight * 0.3892f)
-                        ),
-                        // مدي اتشارها
-                        radius = glowWidth * 0.4772f,
-                        blendMode = BlendMode.Overlay
-                    )
-                }
-
-            }
-
-
-            .drawWithCache {
-                // الأبعاد الأصلية التي أعطيتِني إياها (Frame Size)
-                val designWidth = 720f
-                val designHeight = 1600f
-
-                // 1. حساب الأبعاد الحقيقية بناءً على شاشة المستخدم الحالية
-                val glowWidth = size.width * (872f / designWidth)
-                val glowHeight = size.height * (792f / designHeight)
-
-
-                // 2. حساب الإزاحة (Offsets) بدقة
-                val offsetX = size.width * (432f / designWidth)
-                val offsetY = size.height * (832f / designHeight)
-
-                onDrawBehind {
-                    // رسم المستطيل الذي يحمل التوهج
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            0.0f to color1,
-                            0.38f to color2,
-                            // 0.85f to Color(0xFF6943AC).copy(alpha = 0.24f), // هنا نضع الـ 24% الخاصة بفيجما
-                            1.0f to Color.Transparent,
-
-                            center = Offset(
-                                // نسلتها اد ايه
-                                x = offsetX + (glowWidth * 0.6186f),
-                                y = offsetY + (glowHeight * 0.3892f)
-                            ),
-                            // مدي اتشارها
-                            radius = glowWidth * 0.5772f
-
-
-                        ),
-                        center = Offset(
-                            // نسلتها اد ايه
-                            x = offsetX + (glowWidth * 0.6186f),
-                            y = offsetY + (glowHeight * 0.3892f)
-                        ),
-                        // مدي اتشارها
-                        radius = glowWidth * 0.5772f,
-                        blendMode = BlendMode.Overlay
-                    )
-                }
-
-            }
-            .blur(
-                radius = 81.dp,
-                edgeTreatment = BlurredEdgeTreatment.Unbounded
-            ),
-
-        content = content
-    )
-
-
-}*/
 
 @Composable
 fun OnBoardingBackground(content: @Composable BoxScope.() -> Unit) {
     val onboardingGlows = remember {
         listOf(
-            GlowConfig(widthRatio = 630f, heightRatio = 630f, offsetXRatio = 217f, offsetYRatio = -384f ,shapeType = GlowShape.OVAL),
-            GlowConfig(widthRatio = 630f, heightRatio = 630f, offsetXRatio = 14f, offsetYRatio = 326f, shapeType = GlowShape.CIRCLE,radiusPercent = 0.4772f),
-            GlowConfig(widthRatio = 872f, heightRatio = 792f, offsetXRatio = 432f, offsetYRatio = 832f, shapeType = GlowShape.CIRCLE, radiusPercent = 0.47f)
+            GlowConfig(
+                widthRatio = 630f,
+                heightRatio = 630f,
+                offsetXRatio = 217f,
+                offsetYRatio = -384f,
+                shapeType = GlowShape.OVAL
+            ),
+            GlowConfig(
+                widthRatio = 630f,
+                heightRatio = 630f,
+                offsetXRatio = 14f,
+                offsetYRatio = 326f,
+                shapeType = GlowShape.CIRCLE,
+                radiusPercent = 0.4772f
+            ),
+            GlowConfig(
+                widthRatio = 872f,
+                heightRatio = 792f,
+                offsetXRatio = 432f,
+                offsetYRatio = 832f,
+                shapeType = GlowShape.CIRCLE,
+                radiusPercent = 0.47f
+            )
         )
     }
 
@@ -2930,650 +1321,134 @@ fun Float.screenPercentageY(): Dp {
 
 
 @Composable
-fun CustomBasicTimeInput(
-    value: String,
-    onValueChange: (String) -> Unit,
-    unit: String,
-    containerColor: Color,
+fun SplashContent(
     modifier: Modifier = Modifier
 ) {
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        cursorBrush = SolidColor(Color(0xFFCAC4D0)), // هنا نغير لونه للأبيض ليظهر بوضوح على الخلفية البنفسجية
-        modifier = modifier,
-        textStyle = TextStyle(
-            textAlign = TextAlign.Center, // الرقم يتسنتر جوه مساحته
-            color = Color.White,
-            fontSize = 23.sp,
-
-            fontFamily = FontFamily(Font(R.font.roboto_regular))
-        ),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        decorationBox = { innerTextField ->
-            Box(
-                modifier = Modifier
-                    .background(containerColor, RoundedCornerShape(4.dp))
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFD0BCFF).copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 5.dp),
-                // .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-
-                    // نضع الـ TextField داخل Box ونعطيه عرضاً أدنى (Intrinsic width)
-                    // عشان ميختفيش وفي نفس الوقت يفضل جنب الحرف
-                    Box(
-                        modifier = Modifier.width(IntrinsicSize.Min),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        // لو القيمة فاضية بنحط مساحة وهمية عشان الحقل ميبقاش عرضه صفر
-                        if (value.isEmpty()) {
-                            Text("00", color = Color.Transparent, fontSize = 22.5.sp)
-                        }
-                        innerTextField()
-                    }
-
-                    Text(
-                        text = unit,
-                        style = TextStyle(
-                            fontSize = 23.sp,//22.5
-                            color = Color.White,//(0xFFE6E1E5).copy(alpha = 0.7f),
-                            fontFamily = FontFamily(Font(R.font.roboto_regular))
-                        ),
-                        modifier = Modifier.padding(
-                            start = if (unit == "h") 1.dp else 4.dp
-                        )
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-
-fun EnterTask(
-    state: TaskCreationState,
-    onIntent: (TaskIntent) -> Unit
-
-){
-    val context = LocalContext.current
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(horizontal = 28.dp),
-        // مسافة X من فيجما
-        // ارتفاع الكارت
-        shape = RoundedCornerShape(18.dp),
-
-
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        // نستخدم Box لعمل تراكب الطبقات
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color(0xFF000000).copy(alpha = 0.56f)) // الطبقة السوداء الداكنة
-            ) //{
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color(0xFFD0BCFF).copy(alpha = 0.11f)) // طبقة اللمعة البنفسجية
-            ) //{
-            // محتويات الكارت هنا
-
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-
-                Text(
-
-                    text = "Set Task",
-                    Modifier.padding(start = 12.dp, top = 8.dp),
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
-
-                    color = Color(0xFFCAC4D0),
-
-
-                    )
-
-                Text(
-                    "Enter Task",
-                    Modifier.padding(start = 12.dp, top = 34.dp),
-                    color = Color(0xFFE6E1E5),
-                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-
-                    fontSize = 16.sp
-
-
-                )
-
-                OutlinedTextField(
-                    value = state.title,
-                    onValueChange = { newValue->
-                                     // text = newValue
-                        onIntent(
-                            TaskIntent.TitleChanged(newValue)
-                        )},
-                    label = { Text(text = "Date") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .padding(horizontal = 12.dp),
-                    shape = RoundedCornerShape(2.dp),
-
-                    colors = OutlinedTextFieldDefaults.colors(
-                        // لون الإطار عندما تضغطين عليه للكتابة
-                        focusedBorderColor = Color.White,
-
-                        // لون الـ Label (كلمة Date) عند الضغط
-                        focusedLabelColor = Color(0xFFCAC4D0),
-                        // لون النص الذي يكتبه المستخدم
-                        focusedTextColor = Color(0xFFCAC4D0)
-                    )
-
-                )
-
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.End // وضع الأزرار على اليمين كما في أندرويد القياسي
-                ) {
-                    // زر الإلغاء (هادئ بصرياً)
-                    TextButton(onClick = { /* Dismiss */ }) {
-                        Text("Cancel", color = Color.White)
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // زر التأكيد (واضح وجاذب للانتباه)
-                    TextButton(onClick = {
-
-
-                        Toast.makeText(context, "The task name has been successfully saved.", Toast.LENGTH_SHORT).show()
-
-
-
-                    }) {
-                        Text("OK", color = Color.White)
-                    }
-                }
-
-
-            }
-
-        }
-    }
-
-}
-
-@Composable
-fun EnterExpectTime(
-    state: TaskCreationState,
-    onIntent: (TaskIntent) -> Unit,
-    onNavigateToTimer: () -> Unit = {}
-){
-    val context = LocalContext.current
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(horizontal = 28.dp),
-
-        // مسافة X من فيجما
-        // ارتفاع الكارت
-        shape = RoundedCornerShape(18.dp),
-
-
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-
-
-        // نستخدم Box لعمل تراكب الطبقات
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color(0xFF000000).copy(alpha = 0.56f)) // الطبقة السوداء الداكنة
-            ) //{
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color(0xFFD0BCFF).copy(alpha = 0.11f)) // طبقة اللمعة البنفسجية
-            )
-            Column(modifier = Modifier.fillMaxWidth()) {
-
-                Text(
-
-                    text = "Expect Time",
-                    Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp),
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
-
-                    color = Color(0xFFCAC4D0),
-
-
-                    )
-
-                Spacer(modifier = Modifier.height(36.dp))//36?
-
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight() // تعادل H 72 Hug
-                            .padding(horizontal = 12.dp), // تعادل Padding 24 / 2
-                    horizontalArrangement = Arrangement.spacedBy(6.dp), // تعادل Gap 12 / 2
-                    verticalAlignment = Alignment.CenterVertically // تعادل Alignment Center
-
-                ) {
-
-
-                    // حقل الساعات
-                    CustomBasicTimeInput(
-                        value = state.hours,
-                      //  value = hours,
-                        onValueChange = { newValue->
-                           // hours = newValue
-                            onIntent (TaskIntent.HoursChanged(newValue))
-                                },
-                        unit = "h",
-                        containerColor = Color(0xFF4F378B),
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text = ":",
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        style = TextStyle(
-                            fontSize = 28.sp,
-                            color = Color(0xFFE6E1E5)
-                        )
-                    )
-
-                    // حقل الدقائق
-                    CustomBasicTimeInput(
-                        value = state.minutes,
-                       // value = minuts,
-                        onValueChange = { newValue->
-                           // minuts = newValue
-                            onIntent(TaskIntent.MinutesChanged(newValue))
-                        },
-                        unit = "min",
-                        containerColor = Color(0xFF7B42FF),
-                        modifier = Modifier.weight(1f)
-                    )
-
-                }
-// --- الأزرار تبقى كما هي في تصميمك ---
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = { /* Dismiss */ }) {
-                        Text("Cancel", color = Color.White)
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { /* OK */
-
-                      //  Log.i("testButton::First",inputHolder.title)
-                       if (state.title.isNotEmpty()) {
-                            onIntent (TaskIntent.SaveTask)
-                               onNavigateToTimer ()
-                         //  ScoreRoute(viewModel)
-                           Toast.makeText(context, "The task has been successfully saved.", Toast.LENGTH_SHORT).show()
-
-
-                       }
-
-
-                    }) {
-
-                        Text("OK", color = Color.White)
-                    }
-                }
-
-
-            }//colum end
-        }
-    }
-}
-@Composable
-fun ScoreRoute(
-    viewModel: TimerViewModel,
-    navController: NavController
-
-) {
-
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    val expectedTime = state.totalTimeInMinutes // 👈 غيري الاسم حسب المتغير عندك في الـ state
-    // 2. نمرره في الـ Route بالشكل ده:
-
-    LaunchedEffect(key1 = state.status) {
-        // إذا كان التايمر وصل لصفر (أو أقل من أو يساوي صفر للأمان البرمجي)
-      //  if (state.currentTime <= 0.0) {
-        if (state.status == SessionStatus.FINISHED) {
-           // navController.navigate(Screen.TaskCompletion.route) {
-            navController.navigate("${Screen.TaskCompletion.route}/$expectedTime"){
-                // بنمسح شاشة التايمر من الـ BackStack عشان لو المستخدم داس زرار الرجوع ميرجعش للتايمر الميت
-                popUpTo(Screen.TimerTask.route) { inclusive = true }
-            }
-        }
-    }
-    ScoreTaskTimer (
-
-        state = state,
-        onIntent = viewModel::onIntent
-    )
-
-
-}
-
-
-@Composable
-fun HomeRoute(
-    onNavigateToTimer: () -> Unit = {},
-    viewModel: TaskViewModel
-) {
-    val state by viewModel.state.collectAsState()
-
-
-    HomeScreen(
-        onNavigateToTimer = onNavigateToTimer,
-        state = state,
-        onIntent = viewModel::onIntent
-    )
-}
-
-
-@Composable
-fun HomeScreen(
-    onNavigateToTimer: () -> Unit = {},
-    state: TaskCreationState,
-    onIntent: (TaskIntent) -> Unit
-
-) {
-
-
-    BgScreen()
-    Column(
-        Modifier.fillMaxSize()
-    )// توسيط أفقي)
-
-    {
-        Spacer(modifier = Modifier.height(53.dp))
-
-        Text(
-
-            text = "Alarm",
-            style = AlarmTextStyle,
-            modifier = Modifier
-                .wrapContentSize()
-
-                .padding(start = 38.dp),
-
-            )
-
-
-        Spacer(modifier = Modifier.height(44.dp))
-
-        EnterTask(
-
-            state = state,
-            onIntent = onIntent
-        )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-
-            EnterExpectTime(
-                onNavigateToTimer = onNavigateToTimer,
-                state = state,
-                onIntent = onIntent
-            )
-
-
-
-   }
-}
-
-
-    @Composable
-    fun SplashContent(
-        modifier: Modifier = Modifier
-    ) {
-        Box(
-            modifier = modifier.fillMaxSize()
-        ) {
-            // 1. صورة البومة الفخمة (الـ Logo الخاص بالتطبيق)
-            Image(
-                painter = painterResource(id = R.drawable.img_splash),
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(300.dp),
-                contentScale = ContentScale.Fit
-            )
-
-            // 2. عمود النصوص الترحيبية ونصوص اسم التطبيق
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy((-15).dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // الكلمة الأولى: Score
-                Text(
-                    text = "Score",
-                    modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
-                    style = TextStyle(
-                        fontSize = 96f.screenFontSize(),
-                        fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-                        color = Color.White,
-                        letterSpacing = (-2).sp
-                    )
-                )
-
-                // الكلمة الثانية: Task
-                Text(
-                    text = "Task",
-                    modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
-                    style = TextStyle(
-                        fontSize = 96f.screenFontSize(),
-                        fontFamily = FontFamily(Font(R.font.sfpro_bold)),
-                        color = Color(0xFFB99BFF)
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(55.dp))
-
-                // النص الفرعي الصغير السفلي
-                Text(
-                    text = "Stay Focused, Stay Productive",
-                    modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
-                    style = TextStyle(
-                        fontSize = 20f.screenFontSize(),
-                        fontFamily = FontFamily(Font(R.font.sfpro_regular)),
-                        color = Color(0xFFC3C3C3),
-                        letterSpacing = 1.sp
-                    )
-                )
-            }
-        }
-    }
-    /*
-@Composable
-fun SplashBackground(
-    modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
-) {
-    val color1 = Color(0xFFEF88ED)
-    val color2 = Color(0xFFA099FF)
-    val color3 = Color(0xFF8350DB)
-    val basePurple = Color(0xFF4A2997)
-
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(basePurple)
-            // 💡 التوهج العلوي الأول
-            .drawWithCache {
-                val designWidth = 720f
-                val designHeight = 1600f
+        modifier = modifier.fillMaxSize()
+    ) {
+        // 1. صورة البومة الفخمة (الـ Logo الخاص بالتطبيق)
+        Image(
+            painter = painterResource(id = R.drawable.img_splash),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(300.dp),
+            contentScale = ContentScale.Fit
+        )
 
-                val glowWidth = size.width * (872f / designWidth)
-                val glowHeight = size.height * (792f / designHeight)
+        // 2. عمود النصوص الترحيبية ونصوص اسم التطبيق
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy((-15).dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // الكلمة الأولى: Score
+            Text(
+                text = "Score",
+                modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
+                style = TextStyle(
+                    fontSize = 96f.screenFontSize(),
+                    fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+                    color = Color.White,
+                    letterSpacing = (-2).sp
+                )
+            )
 
-                val offsetX = size.width * (-202f / designWidth)
-                val offsetY = size.height * (-604f / designHeight)
+            // الكلمة الثانية: Task
+            Text(
+                text = "Task",
+                modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
+                style = TextStyle(
+                    fontSize = 96f.screenFontSize(),
+                    fontFamily = FontFamily(Font(R.font.sfpro_bold)),
+                    color = Color(0xFFB99BFF)
+                )
+            )
 
-                onDrawBehind {
-                    drawOval(
-                        brush = Brush.radialGradient(
-                            0.0f to color1,
-                            0.375f to color2,
-                            1.0f to color3,
-                            center = Offset(
-                                x = offsetX + (glowWidth * 0.6186f),
-                                y = offsetY + (glowHeight * 0.3892f)
-                            ),
-                            radius = glowWidth * 0.5772f
-                        ),
-                        topLeft = Offset(offsetX, offsetY),
-                        size = Size(glowWidth, glowHeight),
-                        alpha = 0.4f,
-                        blendMode = BlendMode.Overlay
-                    )
-                }
-            }
-            // 💡 التوهج السفلي الثاني
-            .drawWithCache {
-                val designWidth = 720f
-                val designHeight = 1600f
-                val newOffestY = -110
+            Spacer(modifier = Modifier.height(55.dp))
 
-                val glowSizePx = size.width * (630f / designWidth)
-                val offsetX = 0f
-                val offsetY = size.height * (661f / designHeight)
-
-                onDrawBehind {
-                    drawRect(
-                        brush = Brush.radialGradient(
-                            0.0f to Color(0xFFEBEBEB),
-                            0.38f to Color(0xFFE3EAFF),
-                            1.0f to Color.Transparent,
-                            center = Offset(
-                                x = glowSizePx * 0.6f,
-                                y = offsetY + (glowSizePx * 0.30f)
-                            ),
-                            radius = glowSizePx / 2
-                        ),
-                        topLeft = Offset(offsetX, offsetY + newOffestY),
-                        size = Size(size.width, glowSizePx),
-                        blendMode = BlendMode.Overlay
-                    )
-                }
-            },
-        content = content // هنا سيتم رسم البومة والنصوص فوق التوهجات بسلام
-    )
-}*/
-
-    @Composable
-    fun SplashBackground(content: @Composable BoxScope.() -> Unit) {
-        val splashGlows = remember {
-            listOf(
-                // التوهج العلوي (يستخدم اللون الثالث الافتراضي)
-                GlowConfig(
-                    widthRatio = 872f,
-                    heightRatio = 792f,
-                    offsetXRatio = -202f,
-                    offsetYRatio = -604f,
-                    shapeType = GlowShape.OVAL,
-                    customColors = { c1, c2 ->
-                        listOf(
-                            0.0f to color1,
-                            0.375f to color2,
-                            1.0f to Color.Transparent
-                        )
-                    },
-                    alpha = 0.4f
-                ),
-                // التوهج السفلي المستطيل الأبيض
-                GlowConfig(
-                    widthRatio = 630f,
-                    heightRatio = 630f,
-                    offsetXRatio = 0f,
-                    offsetYRatio = 551f,
-                    shapeType = GlowShape.CIRCLE,
-                    customColors = { _, _ ->
-                        listOf(
-                            0.0f to Color(0xFFEBEBEB),
-                            0.38f to color2,
-                            1.0f to Color.Transparent
-                        )
-                    },
-                    radiusPercent = 0.44f
-
+            // النص الفرعي الصغير السفلي
+            Text(
+                text = "Stay Focused, Stay Productive",
+                modifier = Modifier.offset(y = (1120f / 1600f).screenPercentageY()),
+                style = TextStyle(
+                    fontSize = 20f.screenFontSize(),
+                    fontFamily = FontFamily(Font(R.font.sfpro_regular)),
+                    color = Color(0xFFC3C3C3),
+                    letterSpacing = 1.sp
                 )
             )
         }
-
-        AppGlowBackground(glowList = splashGlows, content = content)
     }
-
-    @Composable
-    fun SplashScreen(onTimeout: () -> Unit) {
-        // 1. إدارة منطق التوقيت والانتقال
-        LaunchedEffect(Unit) {
-            delay(1000)
-            onTimeout()
-
-        }
-
-        // 2. تجميع الشاشة: نضع الخلفية وبداخلها المحتوى
-        SplashBackground {
-            SplashContent()
-        }
-    }
+}
 
 
-    @Composable
-    fun Greeting(name: String, modifier: Modifier = Modifier) {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
+@Composable
+fun SplashBackground(content: @Composable BoxScope.() -> Unit) {
+    val splashGlows = remember {
+        listOf(
+            // التوهج العلوي (يستخدم اللون الثالث الافتراضي)
+            GlowConfig(
+                widthRatio = 872f,
+                heightRatio = 792f,
+                offsetXRatio = -202f,
+                offsetYRatio = -604f,
+                shapeType = GlowShape.OVAL,
+                customColors = { c1, c2 ->
+                    listOf(
+                        0.0f to color1,
+                        0.375f to color2,
+                        1.0f to Color.Transparent
+                    )
+                },
+                alpha = 0.4f
+            ),
+            // التوهج السفلي المستطيل الأبيض
+            GlowConfig(
+                widthRatio = 630f,
+                heightRatio = 630f,
+                offsetXRatio = 0f,
+                offsetYRatio = 551f,
+                shapeType = GlowShape.CIRCLE,
+                customColors = { _, _ ->
+                    listOf(
+                        0.0f to Color(0xFFEBEBEB),
+                        0.38f to color2,
+                        1.0f to Color.Transparent
+                    )
+                },
+                radiusPercent = 0.44f
+
+            )
         )
     }
 
+    AppGlowBackground(glowList = splashGlows, content = content)
+}
 
-
-/*
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    ScoreTaskTheme {
-        Greeting("Android")
+fun SplashScreen(onTimeout: () -> Unit) {
+    // 1. إدارة منطق التوقيت والانتقال
+    LaunchedEffect(Unit) {
+        delay(1000)
+        onTimeout()
+
     }
-}*/
+
+    // 2. تجميع الشاشة: نضع الخلفية وبداخلها المحتوى
+    SplashBackground {
+        SplashContent()
+    }
+}
+
+
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hello $name!",
+        modifier = modifier
+    )
+}
+
+

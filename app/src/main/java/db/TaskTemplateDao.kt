@@ -9,91 +9,114 @@ import com.example.scoretask.model.TaskTemplateEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-    interface TaskTemplateDao {
+interface TaskTemplateDao {
 
 
-        // ------------------------
-        // Insert
-        // ------------------------
+    // ------------------------
+    // Insert
+    // ------------------------
 
-        @Insert(onConflict = OnConflictStrategy.ABORT)
-        suspend fun insertTask(task: TaskTemplateEntity): Long
-
-
-        // ------------------------
-        // Update
-        // ------------------------
-
-        @Update
-        suspend fun updateTask(task: TaskTemplateEntity)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertTask(task: TaskTemplateEntity): Long
 
 
-        // ------------------------
-        // Archive (Soft Delete)
-        // ------------------------
+    // ------------------------
+    // Update
+    // ------------------------
 
-        @Query("""
+    @Update
+    suspend fun updateTask(task: TaskTemplateEntity)
+
+
+    // ------------------------
+    // Archive (Soft Delete)
+    // ------------------------
+
+    @Query(
+        """
         UPDATE task_templates
         SET is_archived = 1
         WHERE task_id = :taskId
-    """)
-        suspend fun archiveTask(taskId: Long)
+    """
+    )
+    suspend fun archiveTask(taskId: Long)
 
 
-        // ------------------------
-        // Restore Archived Task
-        // ------------------------
+    // ------------------------
+    // Restore Archived Task
+    // ------------------------
 
-        @Query("""
+    @Query(
+        """
         UPDATE task_templates
         SET is_archived = 0
         WHERE task_id = :taskId
-    """)
-        suspend fun restoreTask(taskId: Long)
+    """
+    )
+    suspend fun restoreTask(taskId: Long)
 
 
-        // ------------------------
-        // Display Home Screen
-        // ------------------------
+    // ------------------------
+    // Display Home Screen
+    // ------------------------
 
-        @Query("""
+    @Query(
+        """
         SELECT *
         FROM task_templates
         WHERE is_archived = 0
         ORDER BY created_at DESC
-    """)
-        fun getAllTasks(): Flow<List<TaskTemplateEntity>>
+    """
+    )
+    fun getAllTasks(): Flow<List<TaskTemplateEntity>>
 
 
-        // ------------------------
-        // Get One Task
-        // ------------------------
+    // ------------------------
+    // Get One Task
+    // ------------------------
 
-        @Query("""
+    @Query(
+        """
         SELECT *
         FROM task_templates
         WHERE task_id = :taskId
-    """)
-        suspend fun getTaskById(taskId: Long): TaskTemplateEntity?
+    """
+    )
+    suspend fun getTaskById(taskId: Long): TaskTemplateEntity?
 
+
+    @Query("DELETE FROM task_templates WHERE task_id IN (:taskIds)")
+    suspend fun deleteTasksById(taskIds: List<Long>): Int
 
     @Query("DELETE FROM task_templates WHERE task_id = :taskId")
     suspend fun deleteTaskById(taskId: Long): Int
 
-        // ------------------------
-        // Check Duplicate Title
-        // ------------------------
+    // ------------------------
+    // Check Duplicate Title
+    // ------------------------
 
-        @Query("""
+
+    @Query(
+        """
         SELECT EXISTS(
             SELECT 1
             FROM task_templates
             WHERE title = :title
             AND is_archived = 0
         )
-    """)
-        suspend fun isTitleExists(title: String): Boolean
-    }
+    """
+    )
+    suspend fun isTitleExists(title: String): Boolean
+
+
+    @Query("SELECT title FROM task_templates WHERE task_id= :taskId")
+    fun getTaskTitleFlow(taskId: Long): Flow<String>
+
+    @Query("UPDATE task_templates SET title = :newTitle WHERE task_id = :taskId")
+    suspend fun updateTaskTitle(taskId: Long, newTitle: String)
+
+
+}
 
 
 
