@@ -30,6 +30,7 @@
 
 * **Challenge:** High state coupling inside UI components made individual screens difficult to unit test and maintain.
 * **Solution:** Applied **State Hoisting** to separate UI from state management. Transformed Composables into stateless components that
+ receive a single `UiState` object and emit user actions (Intents), making the UI fully testable and previewable.
 
 
 ## 📱 Screenshots
@@ -46,4 +47,4 @@
 
 
 
-* receive a single `UiState` object and emit user actions (Intents), making the UI fully testable and previewable.
+
