@@ -17,5 +17,16 @@
 
 * **Language:** Kotlin
 * **UI Framework:** Jetpack Compose (Declarative UI)
-* **Architecture:** MVI (Model-View-Intent) + Clean Architecture
-* **Navigation:** Navigation Compose (Single-Activity Architecture)
+* **Architecture:** MVI (Model-View-Intent) 
+* **Navigation:** Navigation Compose (Single-Activity Architecture) 
+
+-------
+
+
+## 💡 Technical Decisions & Challenges 
+
+* **Why MVI Architecture?**
+  Selected because the app relies on a unified UI State object. MVI ensures that timer updates, session progress, and performance metrics update atomically in the UI without race conditions or conflicting view states.
+
+* **Challenge:** High state coupling inside UI components made individual screens difficult to unit test and maintain.
+* **Solution:** Applied **State Hoisting** to separate UI from state management. Transformed Composables into stateless components that receive a single `UiState` object and emit user actions (Intents), making the UI fully testable and previewable.
