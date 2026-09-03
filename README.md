@@ -11,3 +11,11 @@
 * 🎯 **Partial Focus Tracking:** Accurately logs focused work time even if a session is ended before completion.
 * ⏳ **One-Time Extension:** Allows a single session extension to accommodate unexpected task overruns gracefully.
 * 📈 **Daily Performance Feedback:** Provides actionable user feedback and calculates daily task completion rates.
+
+  ------
+## 🛠️ Tech Stack & Architecture
+
+* **Language:** Kotlin
+* **UI Framework:** Jetpack Compose (Declarative UI)
+* **Architecture:** MVI (Model-View-Intent) + Clean Architecture
+* **Navigation:** Navigation Compose (Single-Activity Architecture)
