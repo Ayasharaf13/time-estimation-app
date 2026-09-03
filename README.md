@@ -29,4 +29,25 @@
   Selected because the app relies on a unified UI State object. MVI ensures that timer updates, session progress, and performance metrics update atomically in the UI without race conditions or conflicting view states.
 
 * **Challenge:** High state coupling inside UI components made individual screens difficult to unit test and maintain.
-* **Solution:** Applied **State Hoisting** to separate UI from state management. Transformed Composables into stateless components that receive a single `UiState` object and emit user actions (Intents), making the UI fully testable and previewable.
+* **Solution:** Applied **State Hoisting** to separate UI from state management. Transformed Composables into stateless components that
+
+
+## 📱 Screenshots
+
+<img width="576" height="1280" alt="Image" src="https://github.com/user-attachments/assets/0268158c-b956-4834-86c0-b10173018b95" />
+
+<img width="576" height="1280" alt="Image" src="https://github.com/user-attachments/assets/3fec561e-af18-4b2d-840d-f10c8e844684" />
+
+<img width="576" height="1280" alt="Image" src="https://github.com/user-attachments/assets/dfc533cf-477c-4b5d-9231-91c6acf4a5da" />
+
+<img width="576" height="1280" alt="Image" src="https://github.com/user-attachments/assets/92bcc467-c1e5-4045-9a09-821adb058aa8" />
+
+<img width="576" height="1280" alt="Image" src="https://github.com/user-attachments/assets/25d0c5c9-51f4-4fd6-b799-a0e2a2b7c989" />
+
+<img width="576" height="1280" alt="Image" src="https://github.com/user-attachments/assets/16fa7936-5f0a-4e77-a2c2-c9cee6deb010" />
+
+<img width="576" height="1280" alt="Image" src="https://github.com/user-attachments/assets/208c7749-801b-4972-8270-347b091c1032" />
+
+<img width="576" height="1280" alt="Image" src="https://github.com/user-attachments/assets/488d0c4c-8deb-47e0-8a9e-07efb27771a0" />
+
+* receive a single `UiState` object and emit user actions (Intents), making the UI fully testable and previewable.
