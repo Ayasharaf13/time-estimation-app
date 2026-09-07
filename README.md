@@ -1,4 +1,4 @@
-<img width="600" height="316" alt="video-scoretask_resize" src="https://github.com/user-attachments/assets/5614c5e1-24dd-4d7c-8206-7136991d69e6" />
+
 # Time Estimation App
 
 > **A productivity tool designed to train user time estimation accuracy through structured focus sessions and detailed time analytics.**
